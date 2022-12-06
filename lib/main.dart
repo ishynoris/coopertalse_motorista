@@ -1,4 +1,3 @@
-import 'package:coopertalse_motorista/motorista/pages/motorista_detalhes_page.dart';
 import 'package:coopertalse_motorista/motorista/pages/motorista_novo_page.dart';
 import 'package:flutter/material.dart';
 
