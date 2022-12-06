@@ -32,10 +32,10 @@ class _FormMotoristaState extends State<FormMotorista> {
   @override
   void initState() {
     super.initState();
-    bool disabled = !_hasCadastro;
-    _numeroCarroEnabled = disabled;
-    _nomeMotoristaEnabled = disabled;
-    _numeroPixEnabled = disabled;
+    bool enabled = !_hasCadastro;
+    _numeroCarroEnabled = enabled;
+    _nomeMotoristaEnabled = enabled;
+    _numeroPixEnabled = enabled;
     _motorista = widget.motorista;
   }
 
