@@ -1,4 +1,4 @@
-import 'package:coopertalse_motorista/motorista/pages/motorista_novo_page.dart';
+import 'package:coopertalse_motorista/motorista/pages/motorista_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -22,7 +22,7 @@ class _AppState extends State<App> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MotoristaNovoPage(),
+      home: MotoristaPage(),
     );
   }
 }
