@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 
 class MotoristaNovoPage extends StatelessWidget {
 
-  MotoristaNovoPage({ super.key });
+  const MotoristaNovoPage({ super.key });
 
   @override
   Widget build(BuildContext context) {
     
     Motorista? motorista = Motorista(nome: "Joaozinho", carro: Carro(20), id: 1);
-    // motorista = null;
+    motorista = null;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Novo Motorista")),
@@ -31,7 +31,7 @@ class MotoristaNovoPage extends StatelessWidget {
                 ],
               ),
             ),
-            FormMotorista(motorista),
+            FormMotorista(motorista:  motorista),
           ],
         ),
       ),

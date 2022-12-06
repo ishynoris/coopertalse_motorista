@@ -9,9 +9,9 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 class FormMotorista extends StatefulWidget {
 
-  final Motorista? _motorista;
+  late Motorista? motorista;
 
-  const  FormMotorista(this._motorista, { super.key });
+  FormMotorista({ this.motorista, super.key });
   
   @override
   State<StatefulWidget> createState() => _FormMotoristaState();
@@ -19,70 +19,93 @@ class FormMotorista extends StatefulWidget {
 
 class _FormMotoristaState extends State<FormMotorista> {
 
-  bool _numeroCarroDisabled = false;
-  bool _nomeMotoristaDisabled = false;
-  bool _numeroPixDisabled = false;
+  bool _numeroCarroEnabled = false;
+  bool _nomeMotoristaEnabled = false;
+  bool _numeroPixEnabled = false;
+  Motorista? _motorista;
 
   bool get _hasCadastro {
-    var motorista = widget._motorista;
+    var motorista = widget.motorista;
     return motorista != null && motorista.isValido();
   }
 
   @override
   void initState() {
     super.initState();
-    bool disabled = _hasCadastro;
-    _numeroCarroDisabled = disabled;
-    _nomeMotoristaDisabled = disabled;
-    _numeroPixDisabled = disabled;
+    bool disabled = !_hasCadastro;
+    _numeroCarroEnabled = disabled;
+    _nomeMotoristaEnabled = disabled;
+    _numeroPixEnabled = disabled;
+    _motorista = widget.motorista;
   }
 
   @override
   FormBuilder build(BuildContext context) {
 
     final formMotoristaNovo = GlobalKey<FormBuilderState>();
-    final nomeMotorista = widget._motorista?.getNome();
-    final numeroCarro = widget._motorista?.getNumeroCarro().toString();
 
     return FormBuilder(
+      key: formMotoristaNovo,
       child: Padding(
         padding: EdgeInsets.only(top: 18),
         child: Column(
           children: [
-            FormBuilderTextField(
-              name: "nome_motorista",
-              enabled: _nomeMotoristaDisabled,
-              initialValue: nomeMotorista,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: MotoristaValidator.validarNome,
-              decoration: InputDecoration(
-                labelText: "Nome do motorista",
-                prefixIcon: Icon(Icons.person),
-                suffixIcon: _getIconEdit(() => _atualizaEstado(nomeMotoristaDisabled: false)),
-              ),
+            Row(
+              children: [
+                Expanded(child: FormBuilderTextField(
+                  name: "nome_motorista",
+                  enabled: _nomeMotoristaEnabled,
+                  initialValue: this._motorista?.getNome,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: MotoristaValidator.validarNome,
+                  decoration: InputDecoration(
+                    labelText: "Nome do motorista",
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                )),
+                IconButton(
+                  icon: _getIconEdit(), 
+                  onPressed: () => _atualizaEstado(nomeMotoristaEnabled: true),
+                ),
+              ],
             ),
-            FormBuilderTextField(
-              name: "numero_carro",
-              enabled: _numeroCarroDisabled,
-              initialValue: numeroCarro,
-              keyboardType: TextInputType.number,
-              inputFormatters: [ FilteringTextInputFormatter.digitsOnly ],
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: CarroValidator.validarNumero,
-              decoration: InputDecoration(
-                labelText: "Número do carro",
-                prefixIcon: Icon(Icons.directions_bus_filled),
-                suffixIcon: _getIconEdit(() => _atualizaEstado(numeroCarroDisabled: false)),
-              ),
+            Row(
+              children: [
+                Expanded(child: FormBuilderTextField(
+                  name: "numero_carro",
+                  enabled: _numeroCarroEnabled,
+                  initialValue: this._motorista?.getNumeroCarro,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [ FilteringTextInputFormatter.digitsOnly ],
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: CarroValidator.validarNumero,
+                  decoration: InputDecoration(
+                    labelText: "Número do carro",
+                    prefixIcon: Icon(Icons.directions_bus_filled),
+                  ),
+                )),
+                IconButton(
+                  icon: _getIconEdit(),
+                  onPressed: () => _atualizaEstado(numeroCarroEnabled: true)
+                ),
+              ],
             ),
-            FormBuilderTextField(
-              name: "numero_pix",
-              enabled: _numeroCarroDisabled,
-              decoration: InputDecoration(
-                labelText: "Chave PIX",
-                prefixIcon: Icon(Icons.pix),
-                suffixIcon: _getIconEdit(() => _atualizaEstado(numeroCarroDisabled: false)),
-              ),
+            Row(
+              children: [
+                Expanded(child:  FormBuilderTextField(
+                  name: "numero_pix",
+                  initialValue: this._motorista?.getNumeroPix,
+                  enabled: _numeroPixEnabled,
+                  decoration: InputDecoration(
+                    labelText: "Chave PIX",
+                    prefixIcon: Icon(Icons.pix),
+                  ),
+                )),
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () => _atualizaEstado(numeroPixEnabled: true)
+                )
+              ],
             ),
             Container(
               alignment: Alignment.bottomCenter,
@@ -97,16 +120,15 @@ class _FormMotoristaState extends State<FormMotorista> {
                   ],
                 ),
                 onPressed: () {
-                  final fields = formMotoristaNovo.currentState?.fields ?? <String, FormBuilderFieldState>{};
-                  final nomeMotorista = fields['nome_motorista']?.value ?? "";
-                  final numeroCarro = int.tryParse(fields['numero_carro']?.value ?? "") ?? 0;
-
-                  Motorista? motorista = widget._motorista;
-                  motorista = motorista == null 
-                          ? Motorista(nome: nomeMotorista, carro: Carro(numeroCarro))
-                          : motorista.copy(nome: nomeMotorista, numero: numeroCarro);
+                  
+                  Motorista motorista = this._crateMotoristaFromState(formMotoristaNovo.currentState);
                   if (motorista.cadastrar()) {
-                    _atualizaEstado(nomeMotoristaDisabled: true, numeroCarroDisabled: true);
+                    _atualizaEstado(
+                      nomeMotoristaEnabled: false,
+                      numeroCarroEnabled: false,
+                      numeroPixEnabled: false,
+                      motorista: motorista,
+                    );
                   }
                 },
               ),
@@ -117,24 +139,46 @@ class _FormMotoristaState extends State<FormMotorista> {
     );
   }
 
-  IconButton? _getIconEdit(Function()? onClicked) {
+  Widget _getIconEdit() {
     if (!_hasCadastro) {
-      return null;
+      return SizedBox();
     }
 
-    return IconButton(
-      icon: Icon(Icons.edit),
-      onPressed: onClicked,
-    );
+    return Icon(Icons.edit);
   }
 
   _atualizaEstado({
-    bool? nomeMotoristaDisabled,
-    bool? numeroCarroDisabled,
+    bool? nomeMotoristaEnabled,
+    bool? numeroCarroEnabled,
+    bool? numeroPixEnabled,
+    Motorista? motorista,
   }) {
     setState(() {
-      _nomeMotoristaDisabled = nomeMotoristaDisabled ?? _nomeMotoristaDisabled;
-      _numeroCarroDisabled = numeroCarroDisabled ?? _numeroCarroDisabled;
+      this._nomeMotoristaEnabled = nomeMotoristaEnabled ?? this._nomeMotoristaEnabled;
+      this._numeroCarroEnabled = numeroCarroEnabled ?? this._numeroCarroEnabled;
+      this._numeroPixEnabled = numeroPixEnabled ??this._numeroPixEnabled;
+      this._motorista = motorista ?? this._motorista;
     });
+  }
+
+  Motorista _crateMotoristaFromState(FormBuilderState? state) {
+    final fields = state?.fields ?? <String, FormBuilderFieldState>{};
+    final nomeMotorista = fields['nome_motorista']?.value;
+    final numeroCarro = int.tryParse(fields['numero_carro']?.value ?? "") ?? 0;
+    final numeroPix = fields['numero_pix']?.value;
+
+    if (this._motorista == null) {
+      return Motorista(
+        nome: nomeMotorista, 
+        carro: Carro(numeroCarro),
+        pix: numeroPix,
+      );
+    }
+
+    return this._motorista!.copy(
+        nome: nomeMotorista, 
+        numero: numeroCarro,
+        pix: numeroPix,
+    );
   }
 }
