@@ -102,7 +102,7 @@ class _FormMotoristaState extends State<FormMotorista> {
                   ),
                 )),
                 IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: _getIconEdit(),
                   onPressed: () => _atualizaEstado(numeroPixEnabled: true)
                 )
               ],
