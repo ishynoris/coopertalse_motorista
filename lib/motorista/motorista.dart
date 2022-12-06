@@ -7,19 +7,25 @@ class Motorista {
   int? id;
   final String nome;
   final Carro carro;
+  String? pix;
 
   Motorista({ 
     this.id = 1,
     required this.nome, 
     required this.carro,
+    this.pix,
   });
 
-  String getNome() {
+  String get getNome {
     return this.nome;
   }
 
-  int getNumeroCarro() {
-    return this.carro.getNumero();
+  String get getNumeroCarro {
+    return this.carro.getNumero().toString();
+  }
+
+  String? get getNumeroPix {
+    return this.pix;
   }
 
   bool isValido() {
@@ -27,17 +33,25 @@ class Motorista {
   }
 
   bool cadastrar() {
+    print(this.toString());
     return true;
   }
 
   Motorista copy({
     String? nome, 
     int? numero,
+    String? pix,
   }) {
     return Motorista(
       nome: nome ?? this.nome,
       carro: Carro(numero ?? this.carro.getNumero()),
+      pix: pix ?? this.pix,
     );
+  }
+
+  @override
+  String toString() {
+    return 'Motorista: {$getNome}, Carro: {$getNumeroCarro}, Pix: {$getNumeroPix}';
   }
 }
 
