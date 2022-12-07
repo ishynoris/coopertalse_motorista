@@ -28,8 +28,8 @@ class MotoristaSharedPreferences implements MotoristaDAOInterface {
   Motorista select() {
     final id = this.prefs.getInt(_prefixId);
     final nome = this.prefs.getString(_prefixNome);
-    final numeroCarro = this.prefs.getInt(_prefixNumeroPix);
-    final pix = this.prefs.getString(_prefixNumeroCarro);
+    final pix = this.prefs.getString(_prefixNumeroPix);
+    final numeroCarro = this.prefs.getInt(_prefixNumeroCarro);
 
     if (nome == null || nome.isEmpty) {
       throw FormatException("Não é possível salvar um motorista sem nome");
