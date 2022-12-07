@@ -1,7 +1,12 @@
+import 'package:coopertalse_motorista/dependencias/dependencias.dart';
 import 'package:coopertalse_motorista/motorista/pages/motorista_page.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Dependencias.init();
+
   runApp(const App());
 }
 

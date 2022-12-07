@@ -1,21 +1,22 @@
-import 'package:coopertalse_motorista/carro/carro.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 import 'package:coopertalse_motorista/motorista/pages/components/form_motorista.dart';
+import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
 import 'package:flutter/material.dart';
 
 class MotoristaPage extends StatelessWidget {
 
-  const MotoristaPage({ super.key });
+  Motorista? _motorista;
+  late String _title;
+
+  MotoristaPage({ super.key });
 
   @override
   Widget build(BuildContext context) {
     
-    Motorista? motorista = Motorista(nome: "Joaozinho", carro: Carro(20), id: 1);
-    motorista = null;
-    String title = motorista == null ? "Novo Motorista" :  "Detalhes do motorista";
+    this._init();
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: Text(this._title)),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -32,10 +33,19 @@ class MotoristaPage extends StatelessWidget {
                 ],
               ),
             ),
-            FormMotorista(motorista:  motorista),
+            FormMotorista(motorista:  _motorista),
           ],
         ),
       ),
     );
+  }
+
+  _init() {
+    try {
+      this._motorista = SharedPreferencesRepo.getMotorista.select();
+      this._title = "Detalhes do motorista";
+    } on FormatException {
+      this._title = "Novo motorista";
+    }
   }
 }
