@@ -1,6 +1,7 @@
 // 
 
 import 'package:coopertalse_motorista/carro/carro.dart';
+import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
 
 class Motorista {
 
@@ -15,6 +16,10 @@ class Motorista {
     required this.carro,
     this.pix,
   });
+
+  int? get getId {
+    return this.id;
+  }
 
   String get getNome {
     return this.nome;
@@ -33,7 +38,12 @@ class Motorista {
   }
 
   bool cadastrar() {
-    print(this.toString());
+    SharedPreferencesRepo.getMotorista.insert(this);
+    return true;
+  }
+
+  bool atualizar() {
+    SharedPreferencesRepo.getMotorista.update(this);
     return true;
   }
 
