@@ -19,24 +19,22 @@ class FormMotorista extends StatefulWidget {
 
 class _FormMotoristaState extends State<FormMotorista> {
 
+  bool _hasCadastro = false;
   bool _numeroCarroEnabled = false;
   bool _nomeMotoristaEnabled = false;
   bool _numeroPixEnabled = false;
   Motorista? _motorista;
 
-  bool get _hasCadastro {
-    var motorista = widget.motorista;
-    return motorista != null && motorista.isValido();
-  }
-
   @override
   void initState() {
     super.initState();
-    bool enabled = !_hasCadastro;
-    _numeroCarroEnabled = enabled;
-    _nomeMotoristaEnabled = enabled;
-    _numeroPixEnabled = enabled;
-    _motorista = widget.motorista;
+    this._motorista = widget.motorista;
+    this._hasCadastro = _motorista != null && _motorista!.isValido();
+
+    bool enabled = !this._hasCadastro;
+    this._numeroCarroEnabled = enabled;
+    this._nomeMotoristaEnabled = enabled;
+    this._numeroPixEnabled = enabled;
   }
 
   @override
@@ -63,10 +61,7 @@ class _FormMotoristaState extends State<FormMotorista> {
                     prefixIcon: Icon(Icons.person),
                   ),
                 )),
-                IconButton(
-                  icon: _getIconEdit(), 
-                  onPressed: () => _atualizaEstado(nomeMotoristaEnabled: true),
-                ),
+                if (_hasCadastro) _getIconEdit(() => _atualizaEstado(nomeMotoristaEnabled: true)),
               ],
             ),
             Row(
@@ -84,10 +79,7 @@ class _FormMotoristaState extends State<FormMotorista> {
                     prefixIcon: Icon(Icons.directions_bus_filled),
                   ),
                 )),
-                IconButton(
-                  icon: _getIconEdit(),
-                  onPressed: () => _atualizaEstado(numeroCarroEnabled: true)
-                ),
+                if (_hasCadastro) _getIconEdit(() => _atualizaEstado(numeroCarroEnabled: true)),
               ],
             ),
             Row(
@@ -101,10 +93,7 @@ class _FormMotoristaState extends State<FormMotorista> {
                     prefixIcon: Icon(Icons.pix),
                   ),
                 )),
-                IconButton(
-                  icon: _getIconEdit(),
-                  onPressed: () => _atualizaEstado(numeroPixEnabled: true)
-                )
+                if (_hasCadastro) _getIconEdit(() => _atualizaEstado(numeroPixEnabled: true)),
               ],
             ),
             Container(
@@ -120,15 +109,16 @@ class _FormMotoristaState extends State<FormMotorista> {
                   ],
                 ),
                 onPressed: () {
-                  
                   Motorista motorista = this._crateMotoristaFromState(formMotoristaNovo.currentState);
                   if (motorista.cadastrar()) {
                     _atualizaEstado(
+                      hasCadastro: true,
                       nomeMotoristaEnabled: false,
                       numeroCarroEnabled: false,
                       numeroPixEnabled: false,
                       motorista: motorista,
                     );
+                    _exibirToast(context, "Motorista cadastrado com sucesso");
                   }
                 },
               ),
@@ -139,21 +129,30 @@ class _FormMotoristaState extends State<FormMotorista> {
     );
   }
 
-  Widget _getIconEdit() {
-    if (!_hasCadastro) {
-      return SizedBox();
-    }
+  IconButton _getIconEdit(onPressed) {
+    return IconButton(icon: Icon(Icons.edit), onPressed: onPressed);
+  }
 
-    return Icon(Icons.edit);
+  _exibirToast(BuildContext context, String mensagem) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(SnackBar(
+      content: Text(mensagem),
+      action: SnackBarAction(
+        label: "OK",
+        onPressed: messenger.hideCurrentSnackBar
+      ),
+    ));
   }
 
   _atualizaEstado({
+    bool? hasCadastro,
     bool? nomeMotoristaEnabled,
     bool? numeroCarroEnabled,
     bool? numeroPixEnabled,
     Motorista? motorista,
   }) {
     setState(() {
+      this._hasCadastro = hasCadastro ?? this._hasCadastro;
       this._nomeMotoristaEnabled = nomeMotoristaEnabled ?? this._nomeMotoristaEnabled;
       this._numeroCarroEnabled = numeroCarroEnabled ?? this._numeroCarroEnabled;
       this._numeroPixEnabled = numeroPixEnabled ??this._numeroPixEnabled;
