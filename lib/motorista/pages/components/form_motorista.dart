@@ -109,6 +109,9 @@ class _FormMotoristaState extends State<FormMotorista> {
                   ],
                 ),
                 onPressed: () {
+                  if (!this._hasCampoHabilitado()) {
+                    return;
+                  }
                   Motorista motorista = this._crateMotoristaFromState(formMotoristaNovo.currentState);
                   if (motorista.cadastrar()) {
                     _atualizaEstado(
@@ -158,6 +161,10 @@ class _FormMotoristaState extends State<FormMotorista> {
       this._numeroPixEnabled = numeroPixEnabled ??this._numeroPixEnabled;
       this._motorista = motorista ?? this._motorista;
     });
+  }
+
+  bool _hasCampoHabilitado() {
+    return this._nomeMotoristaEnabled || this._numeroCarroEnabled || this._numeroPixEnabled;
   }
 
   Motorista _crateMotoristaFromState(FormBuilderState? state) {
