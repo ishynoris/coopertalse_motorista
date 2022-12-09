@@ -3,9 +3,11 @@
 
 import 'package:coopertalse_motorista/carro/carro.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
+import 'package:coopertalse_motorista/util/localizacao.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:geolocator/geolocator.dart';
 
 class FormMotorista extends StatefulWidget {
 
@@ -23,18 +25,25 @@ class _FormMotoristaState extends State<FormMotorista> {
   bool _numeroCarroEnabled = false;
   bool _nomeMotoristaEnabled = false;
   bool _numeroPixEnabled = false;
+  double _latitude = 0;
+  double _longitude = 0;
   Motorista? _motorista;
 
   @override
   void initState() {
     super.initState();
+
+    Localizacao.processarAtualizacao(_atualizarPosicao);
+
     this._motorista = widget.motorista;
     this._hasCadastro = _motorista != null && _motorista!.isValido();
 
     bool enabled = !this._hasCadastro;
     this._numeroCarroEnabled = enabled;
     this._nomeMotoristaEnabled = enabled;
-    this._numeroPixEnabled = enabled;
+    this._numeroPixEnabled = enabled; 
+    this._latitude = 0;
+    this._longitude = 0;
   }
 
   @override
@@ -99,6 +108,11 @@ class _FormMotoristaState extends State<FormMotorista> {
             Container(
               alignment: Alignment.bottomCenter,
               margin: EdgeInsets.only(top: 20),
+              child: Text("Lat: {$_latitude} Lng {$_longitude}"),
+            ),
+            Container(
+              alignment: Alignment.bottomCenter,
+              margin: EdgeInsets.only(top: 20),
               child: ElevatedButton(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -152,13 +166,17 @@ class _FormMotoristaState extends State<FormMotorista> {
     bool? nomeMotoristaEnabled,
     bool? numeroCarroEnabled,
     bool? numeroPixEnabled,
+    double? latitude,
+    double? longitude,
     Motorista? motorista,
   }) {
     setState(() {
       this._hasCadastro = hasCadastro ?? this._hasCadastro;
       this._nomeMotoristaEnabled = nomeMotoristaEnabled ?? this._nomeMotoristaEnabled;
       this._numeroCarroEnabled = numeroCarroEnabled ?? this._numeroCarroEnabled;
-      this._numeroPixEnabled = numeroPixEnabled ??this._numeroPixEnabled;
+      this._numeroPixEnabled = numeroPixEnabled ?? this._numeroPixEnabled;
+      this._latitude = latitude ?? this._latitude;
+      this._longitude = longitude ?? this._longitude;
       this._motorista = motorista ?? this._motorista;
     });
   }
@@ -185,6 +203,14 @@ class _FormMotoristaState extends State<FormMotorista> {
         nome: nomeMotorista, 
         numero: numeroCarro,
         pix: numeroPix,
+    );
+  }
+
+  _atualizarPosicao(Position position) async {
+    print(position);
+    this._atualizaEstado(
+      latitude: position.latitude,
+      longitude: position.longitude
     );
   }
 }
