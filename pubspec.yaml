@@ -39,6 +39,7 @@ dependencies:
   flutter_form_builder: ^7.7.0
   shared_preferences: ^2.0.15
   geolocator: ^9.0.2
+  device_info_plus: ^8.0.0
 
 dev_dependencies:
   flutter_test:
