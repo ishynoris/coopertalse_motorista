@@ -2,6 +2,7 @@
 
 import 'package:coopertalse_motorista/carro/carro.dart';
 import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
+import 'package:coopertalse_motorista/util/dispositivo.dart';
 
 class Motorista {
 
@@ -9,12 +10,14 @@ class Motorista {
   final String nome;
   final Carro carro;
   String? pix;
+  DispositivoInfo? dispositivo;
 
   Motorista({ 
     this.id = 1,
     required this.nome, 
     required this.carro,
     this.pix,
+    this.dispositivo,
   });
 
   int? get getId {
@@ -37,6 +40,10 @@ class Motorista {
     return this.id! > 0;
   }
 
+  DispositivoInfo? get getDispositivo {
+    return this.dispositivo;
+  }
+
   bool cadastrar() {
     SharedPreferencesRepo.getMotorista.insert(this);
     return true;
@@ -51,17 +58,26 @@ class Motorista {
     String? nome, 
     int? numero,
     String? pix,
+    DispositivoInfo? dispositivo,
   }) {
     return Motorista(
       nome: nome ?? this.nome,
       carro: Carro(numero ?? this.carro.getNumero()),
       pix: pix ?? this.pix,
+      dispositivo: dispositivo ?? this.dispositivo,
     );
   }
 
   @override
   String toString() {
     return 'Motorista: {$getNome}, Carro: {$getNumeroCarro}, Pix: {$getNumeroPix}';
+  }
+
+  String hash() {
+    if (this.dispositivo == null) {
+      return "";
+    }
+    return "${this.getNumeroCarro}${this.dispositivo!.getIdentificador}";
   }
 }
 

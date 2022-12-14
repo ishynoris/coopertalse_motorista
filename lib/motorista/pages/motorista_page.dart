@@ -1,19 +1,32 @@
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 import 'package:coopertalse_motorista/motorista/pages/components/form_motorista.dart';
 import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
+import 'package:coopertalse_motorista/util/dispositivo.dart';
 import 'package:flutter/material.dart';
 
-class MotoristaPage extends StatelessWidget {
+class MotoristaPage extends StatefulWidget {
 
-  Motorista? _motorista;
+  const MotoristaPage({ super.key });
+
+  @override
+  State<StatefulWidget> createState() => _MotoristaState();
+}
+
+class _MotoristaState extends State<MotoristaPage> {
+
   late String _title;
+  Motorista? _motorista;
+  DispositivoInfo? _info;
 
-  MotoristaPage({ super.key });
+  @override
+  void initState() {
+    super.initState();
+    this._init();
+    this._initInfoDispositivo();
+  }
 
   @override
   Widget build(BuildContext context) {
-    
-    this._init();
 
     return Scaffold(
       appBar: AppBar(title: Text(this._title)),
@@ -22,7 +35,7 @@ class MotoristaPage extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.only(top: 18, bottom: 5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -34,6 +47,18 @@ class MotoristaPage extends StatelessWidget {
               ),
             ),
             FormMotorista(motorista:  _motorista),
+            if (this._info != null) 
+              Container(
+                alignment: Alignment.bottomRight,
+                padding: EdgeInsets.only(top: 3),
+                child: Text(this._info!.getModelo),
+              ),
+            if (this._info != null) 
+              Container(
+                alignment: Alignment.bottomRight,
+                padding: EdgeInsets.only(top: 3),
+                child: Text(this._info!.getIdentificador),
+              ),
           ],
         ),
       ),
@@ -47,5 +72,14 @@ class MotoristaPage extends StatelessWidget {
     } on FormatException {
       this._title = "Novo motorista";
     }
+  }
+
+  _initInfoDispositivo() async {
+    DispositivoInfo? info = await Dispositivo.getInfo();
+    setState(() {
+      this._info = info;
+      this._motorista = this._motorista!.copy(dispositivo: this._info);
+      this._motorista!.atualizar();
+    });
   }
 }

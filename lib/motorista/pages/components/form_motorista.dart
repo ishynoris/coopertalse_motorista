@@ -54,7 +54,7 @@ class _FormMotoristaState extends State<FormMotorista> {
     return FormBuilder(
       key: formMotoristaNovo,
       child: Padding(
-        padding: EdgeInsets.only(top: 18),
+        padding: EdgeInsets.only(top: 0),
         child: Column(
           children: [
             Row(
@@ -207,7 +207,6 @@ class _FormMotoristaState extends State<FormMotorista> {
   }
 
   _atualizarPosicao(Position position) async {
-    print(position);
     this._atualizaEstado(
       latitude: position.latitude,
       longitude: position.longitude
