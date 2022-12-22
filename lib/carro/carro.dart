@@ -1,14 +1,23 @@
 class Carro {
-  final int _numero;
+  final String _numero;
 
   Carro(this._numero);
 
-  int getNumero() {
+  static Carro empty() {
+    return Carro ("");
+  }
+
+  static Carro from (Map json) {
+    final String numero = json['cro_numero'];
+    return Carro(numero);
+  }
+
+  String getNumero() {
     return _numero;
   }
 
   String getNumeroFormatado() {
-    return '$_numero'.padLeft(3, "0");
+    return _numero.padLeft(3, "0");
   }
 }
 
