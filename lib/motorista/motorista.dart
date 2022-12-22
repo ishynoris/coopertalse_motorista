@@ -13,12 +13,21 @@ class Motorista {
   DispositivoInfo? dispositivo;
 
   Motorista({ 
-    this.id = 1,
+    this.id,
     required this.nome, 
     required this.carro,
     this.pix,
     this.dispositivo,
   });
+
+  static Motorista empty() {
+    return Motorista(nome: "", carro: Carro.empty());
+  }
+
+  static Motorista from(Map json) {
+    final carro = Carro.from(json);
+    return Motorista(nome: json['mta_nome'], carro: carro);
+  }
 
   int? get getId {
     return this.id;
@@ -37,7 +46,7 @@ class Motorista {
   }
 
   bool isValido() {
-    return this.id! > 0;
+    return this.nome.isNotEmpty;
   }
 
   DispositivoInfo? get getDispositivo {
@@ -56,7 +65,7 @@ class Motorista {
 
   Motorista copy({
     String? nome, 
-    int? numero,
+    String? numero,
     String? pix,
     DispositivoInfo? dispositivo,
   }) {
@@ -71,6 +80,15 @@ class Motorista {
   @override
   String toString() {
     return 'Motorista: {$getNome}, Carro: {$getNumeroCarro}, Pix: {$getNumeroPix}';
+  }
+
+  Map toJson() {
+    return {
+      'mta_nome': this.getNome,
+      'mta_device_hash': "DDDDDDDD",
+      'cro_numero': this.getNumeroCarro,
+      'chx_chave_pix': [ this.pix ],
+    };
   }
 
   String hash() {

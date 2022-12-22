@@ -1,6 +1,6 @@
+import 'package:coopertalse_motorista/motorista/api/motorista_api.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 import 'package:coopertalse_motorista/motorista/pages/components/form_motorista.dart';
-import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
 import 'package:coopertalse_motorista/util/dispositivo.dart';
 import 'package:flutter/material.dart';
 
@@ -14,14 +14,14 @@ class MotoristaPage extends StatefulWidget {
 
 class _MotoristaState extends State<MotoristaPage> {
 
-  late String _title;
-  Motorista? _motorista;
-  DispositivoInfo? _info;
+  String _title = "Novo motorista";
+  Motorista _motorista = Motorista.empty();
+  DispositivoInfo _info = DispositivoInfo.empty();
 
   @override
   void initState() {
     super.initState();
-    this._init();
+    this._initMotorista();
     this._initInfoDispositivo();
   }
 
@@ -47,39 +47,42 @@ class _MotoristaState extends State<MotoristaPage> {
               ),
             ),
             FormMotorista(motorista:  _motorista),
-            if (this._info != null) 
-              Container(
-                alignment: Alignment.bottomRight,
-                padding: EdgeInsets.only(top: 3),
-                child: Text(this._info!.getModelo),
-              ),
-            if (this._info != null) 
-              Container(
-                alignment: Alignment.bottomRight,
-                padding: EdgeInsets.only(top: 3),
-                child: Text(this._info!.getIdentificador),
-              ),
+            Container(
+              alignment: Alignment.bottomRight,
+              padding: EdgeInsets.only(top: 3),
+              child: Text(this._info.getModelo),
+            ),
+            Container(
+              alignment: Alignment.bottomRight,
+              padding: EdgeInsets.only(top: 3),
+              child: Text(this._info.getIdentificador),
+            ),
           ],
         ),
       ),
     );
   }
 
-  _init() {
-    try {
-      this._motorista = SharedPreferencesRepo.getMotorista.select();
-      this._title = "Detalhes do motorista";
-    } on FormatException {
-      this._title = "Novo motorista";
-    }
+  _initMotorista() async {
+    final motorista = await MotoristaAPI.consultarPorPorHashDispositivo("DDDDDDDD");
+    _atualzarEstado(motorista: motorista, title: "Detalhes do motorista");
   }
 
   _initInfoDispositivo() async {
-    DispositivoInfo? info = await Dispositivo.getInfo();
+    DispositivoInfo info = await Dispositivo.getInfo();
+    Motorista motorista = this._motorista.copy(dispositivo: info);
+    _atualzarEstado(info: info, motorista: motorista);
+  }
+
+  _atualzarEstado({
+    Motorista? motorista,
+    String? title,
+    DispositivoInfo? info,
+  }) {
     setState(() {
-      this._info = info;
-      this._motorista = this._motorista!.copy(dispositivo: this._info);
-      this._motorista!.atualizar();
+      this._motorista = motorista ?? this._motorista;
+      this._title = title ?? this._title;
+      this._info = info ?? this._info;
     });
   }
 }

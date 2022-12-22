@@ -11,9 +11,9 @@ import 'package:geolocator/geolocator.dart';
 
 class FormMotorista extends StatefulWidget {
 
-  late Motorista? motorista;
+  final Motorista motorista;
 
-  FormMotorista({ this.motorista, super.key });
+  const FormMotorista({ required this.motorista, super.key });
   
   @override
   State<StatefulWidget> createState() => _FormMotoristaState();
@@ -27,7 +27,7 @@ class _FormMotoristaState extends State<FormMotorista> {
   bool _numeroPixEnabled = false;
   double _latitude = 0;
   double _longitude = 0;
-  Motorista? _motorista;
+  late Motorista _motorista;
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _FormMotoristaState extends State<FormMotorista> {
     Localizacao.processarAtualizacao(_atualizarPosicao);
 
     this._motorista = widget.motorista;
-    this._hasCadastro = _motorista != null && _motorista!.isValido();
+    this._hasCadastro = _motorista.isValido();
 
     bool enabled = !this._hasCadastro;
     this._numeroCarroEnabled = enabled;
@@ -62,7 +62,7 @@ class _FormMotoristaState extends State<FormMotorista> {
                 Expanded(child: FormBuilderTextField(
                   name: "nome_motorista",
                   enabled: _nomeMotoristaEnabled,
-                  initialValue: this._motorista?.getNome,
+                  initialValue: this._motorista.getNome,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: MotoristaValidator.validarNome,
                   decoration: InputDecoration(
@@ -78,7 +78,7 @@ class _FormMotoristaState extends State<FormMotorista> {
                 Expanded(child: FormBuilderTextField(
                   name: "numero_carro",
                   enabled: _numeroCarroEnabled,
-                  initialValue: this._motorista?.getNumeroCarro,
+                  initialValue: this._motorista.getNumeroCarro,
                   keyboardType: TextInputType.number,
                   inputFormatters: [ FilteringTextInputFormatter.digitsOnly ],
                   autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -95,7 +95,7 @@ class _FormMotoristaState extends State<FormMotorista> {
               children: [
                 Expanded(child:  FormBuilderTextField(
                   name: "numero_pix",
-                  initialValue: this._motorista?.getNumeroPix,
+                  initialValue: this._motorista.getNumeroPix,
                   enabled: _numeroPixEnabled,
                   decoration: InputDecoration(
                     labelText: "Chave PIX",
@@ -188,18 +188,10 @@ class _FormMotoristaState extends State<FormMotorista> {
   Motorista _crateMotoristaFromState(FormBuilderState? state) {
     final fields = state?.fields ?? <String, FormBuilderFieldState>{};
     final nomeMotorista = fields['nome_motorista']?.value;
-    final numeroCarro = int.tryParse(fields['numero_carro']?.value ?? "") ?? 0;
+    final numeroCarro = fields['numero_carro']?.value;
     final numeroPix = fields['numero_pix']?.value;
 
-    if (this._motorista == null) {
-      return Motorista(
-        nome: nomeMotorista, 
-        carro: Carro(numeroCarro),
-        pix: numeroPix,
-      );
-    }
-
-    return this._motorista!.copy(
+    return this._motorista.copy(
         nome: nomeMotorista, 
         numero: numeroCarro,
         pix: numeroPix,

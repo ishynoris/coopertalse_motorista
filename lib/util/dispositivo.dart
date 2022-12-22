@@ -2,37 +2,63 @@ import 'package:device_info_plus/device_info_plus.dart';
 
 class Dispositivo {
 
-  static DispositivoInfo? _info;
+  static DispositivoInfo _info = DispositivoInfo.empty();
 
-  static Future<DispositivoInfo?> getInfo() async {
-    if (Dispositivo._info == null) {
-      final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-      Dispositivo._info = _AndroidInfo(await deviceInfoPlugin.androidInfo);
-    }
+  static Future<DispositivoInfo> getInfo() async {
+    final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+    final androidInfo = _AndroidInfo(await deviceInfoPlugin.androidInfo);
+    Dispositivo._info = Dispositivo._info.copyFrom(
+      modelo: androidInfo.modelo, 
+      identificador: androidInfo.identificador,
+    );
     return Dispositivo._info;
   }
 }
 
-abstract class DispositivoInfo {
+class DispositivoInfo {
 
-  String get getModelo;
+  String modelo;
+  String identificador;
 
-  String get getIdentificador;
+  DispositivoInfo(
+    this.modelo,
+    this.identificador
+  );
+
+  String get getModelo {
+    return this.modelo;
+  }
+
+  String get getIdentificador {
+    return this.identificador;
+  }
+
+  bool get isEmpty {
+    return modelo.isEmpty || identificador.isEmpty;
+  }
+
+  static DispositivoInfo empty() {
+    return DispositivoInfo("", "");
+  }
+
+  DispositivoInfo copyFrom({
+    String? modelo,
+    String? identificador,
+  }) {
+    return DispositivoInfo(
+      modelo ?? this.modelo,
+      identificador ?? this.identificador,
+    );
+  }
 }
 
 class _AndroidInfo extends DispositivoInfo {
 
   AndroidDeviceInfo deviceInfo;
 
-  _AndroidInfo(this.deviceInfo);
+  _AndroidInfo(this.deviceInfo) : super (_AndroidInfo._getModelo(deviceInfo), deviceInfo.id);
 
-  @override
-  String get getModelo {
-    return "${this.deviceInfo.model} (${this.deviceInfo.manufacturer})";
-  }
-  
-  @override
-  String get getIdentificador {
-    return this.deviceInfo.id;
+  static String _getModelo(AndroidDeviceInfo deviceInfo) {
+    return "${deviceInfo.model} (${deviceInfo.manufacturer})";
   }
 }
