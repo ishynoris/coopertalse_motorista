@@ -14,12 +14,10 @@ class FormMotorista extends StatelessWidget {
 
   final _formMotorista = GlobalKey<FormBuilderState>();
 
-  FormMotorista({ super.key });
+  FormMotorista({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-
     return FormBuilder(
       key: _formMotorista,
       child: Padding(
@@ -61,7 +59,6 @@ class FormMotorista extends StatelessWidget {
   _onClicked(BuildContext context) {
     Motorista motorista = this._crateMotoristaFromState(this._formMotorista.currentState);
     context.read<MotoristaBloc>().add(MotoristaChangedEvent(motorista: motorista));
-    // _exibirToast(context, "Motorista cadastrado com sucesso");
   }
 
   Motorista _crateMotoristaFromState(FormBuilderState? state) {

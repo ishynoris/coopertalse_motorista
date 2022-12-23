@@ -9,13 +9,16 @@ class MotoristaAPI {
     return await Request.post("/motorista", motorista.toJson());
   }
 
-  static Future<Motorista> consultarPorPorHashDispositivo(String sHash) async {
+  Future<Motorista> consultarPorPorHashDispositivo(String sHash) async {
     final mapJson = await Request.get("/dispositivo/$sHash/motorista");
     if (mapJson['sucesso']) {
       final json = mapJson['resposta'];
-      print(json);
       return Motorista.from(jsonDecode(json));
     }
-    return Motorista.empty();
+    return Motorista.empty;
+  }
+
+  Future<Motorista> atualizar(Motorista motorista) async {
+    return motorista;
   }
 }

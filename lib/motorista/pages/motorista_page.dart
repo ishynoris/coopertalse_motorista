@@ -5,6 +5,7 @@ import 'package:coopertalse_motorista/motorista/bloc/motorista_bloc.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_event.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_state.dart';
 import 'package:coopertalse_motorista/motorista/pages/components/form_motorista.dart';
+import 'package:coopertalse_motorista/util/popup_usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,7 +17,18 @@ class MotoristaPage extends StatefulWidget {
 }
 
 class _MotoristaState extends State<MotoristaPage> {
-  String _title = "Novo motorista";
+  late String _title;
+  late bool _inicado;
+  final motoristaBloc = MotoristaBloc();
+  
+  _MotoristaState();
+
+  @override
+  void initState() {
+    this._title = "Novo motorista";
+    this._inicado = false;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +52,7 @@ class _MotoristaState extends State<MotoristaPage> {
               ),
             ),
             BlocProvider(
-              create: (context) => MotoristaBloc(),
+              create: (context) => motoristaBloc,
               child: BlocListener<MotoristaBloc, MotoristaState>(
                 listener: _listenMotoristaEvent,
                 child: FormMotorista(),
@@ -50,7 +62,7 @@ class _MotoristaState extends State<MotoristaPage> {
               create: (context) => DispositivoBloc(),
               child: BlocListener<DispositivoBloc, DispositivoState>(
                 listener: _listenDispostivoEvent,
-                child: DispositivoDetalhePage(),
+                child: DispositivoDetalhePage(iniciado: this._inicado),
               ),
             ),
           ],
@@ -60,13 +72,17 @@ class _MotoristaState extends State<MotoristaPage> {
   }
 
   _listenMotoristaEvent(BuildContext context, MotoristaState state) {
-    state.motorista.atualizar();
-    if (state is MotoristaChangedEvent) {
-      setState(() => this._title = "Detalhes do motorista");
+    if (state is MotoristaSucessoState) {
+      PopupUsuario(state.mensagem).showSnakbar(context);
+      setState(() {
+        this._title = "Detalhes do motorista";
+        this._inicado = true;
+      });
     }
   }
 
   _listenDispostivoEvent(BuildContext context, DispositivoState state) {
-    
+    final String hashDispositivo = state.info?.getIdentificador ?? "";
+    motoristaBloc.add(MotoristaLoadingEvent(hash: hashDispositivo));
   }
 }
