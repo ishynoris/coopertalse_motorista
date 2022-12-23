@@ -5,29 +5,15 @@ import 'package:coopertalse_motorista/dispositivo/dispositivo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DispositivoDetalhePage extends StatefulWidget {
+class DispositivoDetalhePage extends StatelessWidget {
 
-  const DispositivoDetalhePage({super.key});
-
-  @override
-  State<StatefulWidget> createState() => DispositivoDetalheState();
-}
-
-class DispositivoDetalheState extends State<DispositivoDetalhePage> {
-
-  late bool _carregarInfoDispositivo;
-
-  @override
-  void initState() {
-    super.initState();
-    this._carregarInfoDispositivo = true;
-  }
+  final bool iniciado;
+  const DispositivoDetalhePage({required this.iniciado, super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (this._carregarInfoDispositivo) {
+    if (!this.iniciado) {
       context.read<DispositivoBloc>().add(DispositivoLoadingEvent());
-      setState(() => this._carregarInfoDispositivo = false);
     }
 
     return Padding(
