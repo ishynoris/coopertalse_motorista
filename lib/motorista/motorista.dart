@@ -20,8 +20,8 @@ class Motorista {
     this.dispositivo,
   });
 
-  static Motorista empty() {
-    return Motorista(nome: "", carro: Carro.empty());
+  static Motorista get empty {
+    return  Motorista(nome: "", carro: Carro.empty());
   }
 
   static Motorista from(Map json) {
@@ -29,8 +29,8 @@ class Motorista {
     return Motorista(nome: json['mta_nome'], carro: carro);
   }
 
-  int? get getId {
-    return this.id;
+  int get getId {
+    return this.id ?? 0;
   }
 
   String get getNome {
@@ -41,8 +41,8 @@ class Motorista {
     return this.carro.getNumero().toString();
   }
 
-  String? get getNumeroPix {
-    return this.pix;
+  String get getNumeroPix {
+    return this.pix ?? "";
   }
 
   bool isValido() {
@@ -85,7 +85,7 @@ class Motorista {
   Map toJson() {
     return {
       'mta_nome': this.getNome,
-      'mta_device_hash': "DDDDDDDD",
+      'mta_device_hash': this.dispositivo?.getIdentificador,
       'cro_numero': this.getNumeroCarro,
       'chx_chave_pix': [ this.pix ],
     };

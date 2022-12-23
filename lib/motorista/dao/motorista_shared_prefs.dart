@@ -17,9 +17,9 @@ class MotoristaSharedPreferences implements MotoristaDAOInterface {
 
   @override
   bool insert(Motorista motorista) {
-    this.prefs.setInt(_prefixId, motorista.getId ?? 0);
+    this.prefs.setInt(_prefixId, motorista.getId);
     this.prefs.setString(_prefixNome, motorista.getNome);
-    this.prefs.setString(_prefixNumeroPix, motorista.getNumeroPix ?? "");
+    this.prefs.setString(_prefixNumeroPix, motorista.getNumeroPix);
     this.prefs.setString(_prefixNumeroCarro, motorista.getNumeroCarro);
     return true;
   }
