@@ -7,33 +7,36 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
 
-  final MotoristaAPI _api = MotoristaAPI();
-  late StreamSubscription<MotoristaStatus> _streamMotorista;
+  final _api = MotoristaAPI();
+  late StreamSubscription<MotoristaState> _streamMotorista;
 
   MotoristaBloc() : super(MotoristaInitialState()) {
     
-    on<MotoristaEvent>(_onMotoristaChanged);
-
-    this._streamMotorista = this._api.status.listen((status) => add(MotoristaInitialEvent()));
+    on<MotoristaEvent>(_handleEvent);
   }
 
-  Future<void> _onMotoristaChanged(MotoristaEvent event, Emitter<MotoristaState> emitter) async {
+  Future<void> _handleEvent(MotoristaEvent event, Emitter<MotoristaState> emitter) async {
     if (event is MotoristaChangedEvent) {
       final motorista = await this._api.atualizar(event.motorista);
-      return emitter(MotoristaUpdateState(motorista));
+      motorista.atualizar();
+      return emitter(MotoristaSucessoState("Atualiza com sucesso", motorista));
     }
 
     if (event is MotoristaLoadingEvent) {
-      final motorista = await this._api.consultarPorPorHashDispositivo(event.hash);
-      return emitter(MotoristaLoadingState(motorista));
+      try {
+        final motorista = await this._api.consultarPorPorHashDispositivo(event.hash);
+        return emitter(MotoristaSucessoState("Suas informações foram recuperadas com sucesso", motorista));
+      } on Exception {
+        return emitter(MotoristaErroState("Ocorreu um erro ao consultar os dados do motorista"));
+      }
     }
 
-    if (event.status == MotoristaStatus.initial) {
+    if (event is MotoristaErrorEvent) {
+      return emitter(MotoristaErroState(event.mensagem));
+    }
+
+    if (event is MotoristaInitialEvent) {
       return emitter(MotoristaInitialState());
-    }
-
-    if (event.status == MotoristaStatus.error) {
-      return emitter(MotoristaErroState());
     }
   }
 

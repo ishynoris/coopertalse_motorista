@@ -1,30 +1,30 @@
-import 'package:coopertalse_motorista/carro/carro.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 
-enum MotoristaStatus { initial, loading, update, error }
-
 abstract class MotoristaState {
-
-  final MotoristaStatus status;
   final Motorista motorista;
   MotoristaState({
-    required this.status,
     required this.motorista,
   });
 }
 
 class MotoristaInitialState extends MotoristaState {
-  MotoristaInitialState() : super(status: MotoristaStatus.initial, motorista: Motorista(nome: "nome", carro: Carro("345")));
+  MotoristaInitialState() : super(motorista: Motorista.empty);
 }
 
 class MotoristaLoadingState extends MotoristaState {
-  MotoristaLoadingState(motorista) : super(status: MotoristaStatus.loading, motorista: motorista);
+  MotoristaLoadingState(motorista) : super(motorista: motorista);
 }
 
 class MotoristaUpdateState extends MotoristaState {
-  MotoristaUpdateState(motorista) : super(status: MotoristaStatus.update, motorista: motorista);
+  MotoristaUpdateState(motorista) : super(motorista: motorista);
+}
+
+class MotoristaSucessoState extends MotoristaState {
+  final String mensagem;
+  MotoristaSucessoState(this.mensagem, motorista) : super(motorista: motorista);
 }
 
 class MotoristaErroState extends MotoristaState {
-  MotoristaErroState() : super(status: MotoristaStatus.error, motorista: Motorista.empty);
+  final String mensagem;
+  MotoristaErroState(this.mensagem) : super(motorista: Motorista.empty);
 }
