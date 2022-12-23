@@ -2,206 +2,141 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:coopertalse_motorista/carro/carro.dart';
+import 'package:coopertalse_motorista/motorista/bloc/motorista_bloc.dart';
+import 'package:coopertalse_motorista/motorista/bloc/motorista_event.dart';
+import 'package:coopertalse_motorista/motorista/bloc/motorista_state.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
-import 'package:coopertalse_motorista/util/localizacao.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:geolocator/geolocator.dart';
 
-class FormMotorista extends StatefulWidget {
+class FormMotorista extends StatelessWidget {
 
-  final Motorista motorista;
+  final _formMotorista = GlobalKey<FormBuilderState>();
 
-  const FormMotorista({ required this.motorista, super.key });
-  
-  @override
-  State<StatefulWidget> createState() => _FormMotoristaState();
-}
-
-class _FormMotoristaState extends State<FormMotorista> {
-
-  bool _hasCadastro = false;
-  bool _numeroCarroEnabled = false;
-  bool _nomeMotoristaEnabled = false;
-  bool _numeroPixEnabled = false;
-  double _latitude = 0;
-  double _longitude = 0;
-  late Motorista _motorista;
+  FormMotorista({ super.key });
 
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
 
-    Localizacao.processarAtualizacao(_atualizarPosicao);
-
-    this._motorista = widget.motorista;
-    this._hasCadastro = _motorista.isValido();
-
-    bool enabled = !this._hasCadastro;
-    this._numeroCarroEnabled = enabled;
-    this._nomeMotoristaEnabled = enabled;
-    this._numeroPixEnabled = enabled; 
-    this._latitude = 0;
-    this._longitude = 0;
-  }
-
-  @override
-  FormBuilder build(BuildContext context) {
-
-    final formMotoristaNovo = GlobalKey<FormBuilderState>();
 
     return FormBuilder(
-      key: formMotoristaNovo,
+      key: _formMotorista,
       child: Padding(
         padding: EdgeInsets.only(top: 0),
-        child: Column(
-          children: [
-            Row(
+        child: BlocBuilder<MotoristaBloc, MotoristaState>(
+          builder: (context, state) {
+            final motorista = state.motorista;
+            return Column(
               children: [
-                Expanded(child: FormBuilderTextField(
-                  name: "nome_motorista",
-                  enabled: _nomeMotoristaEnabled,
-                  initialValue: this._motorista.getNome,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: MotoristaValidator.validarNome,
-                  decoration: InputDecoration(
-                    labelText: "Nome do motorista",
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                )),
-                if (_hasCadastro) _getIconEdit(() => _atualizaEstado(nomeMotoristaEnabled: true)),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(child: FormBuilderTextField(
-                  name: "numero_carro",
-                  enabled: _numeroCarroEnabled,
-                  initialValue: this._motorista.getNumeroCarro,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [ FilteringTextInputFormatter.digitsOnly ],
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: CarroValidator.validarNumero,
-                  decoration: InputDecoration(
-                    labelText: "Número do carro",
-                    prefixIcon: Icon(Icons.directions_bus_filled),
-                  ),
-                )),
-                if (_hasCadastro) _getIconEdit(() => _atualizaEstado(numeroCarroEnabled: true)),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(child:  FormBuilderTextField(
-                  name: "numero_pix",
-                  initialValue: this._motorista.getNumeroPix,
-                  enabled: _numeroPixEnabled,
-                  decoration: InputDecoration(
-                    labelText: "Chave PIX",
-                    prefixIcon: Icon(Icons.pix),
-                  ),
-                )),
-                if (_hasCadastro) _getIconEdit(() => _atualizaEstado(numeroPixEnabled: true)),
-              ],
-            ),
-            Container(
-              alignment: Alignment.bottomCenter,
-              margin: EdgeInsets.only(top: 20),
-              child: Text("Lat: {$_latitude} Lng {$_longitude}"),
-            ),
-            Container(
-              alignment: Alignment.bottomCenter,
-              margin: EdgeInsets.only(top: 20),
-              child: ElevatedButton(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check),
-                    SizedBox(height: 5),
-                    Text("Salvar")
-                  ],
+                _InputMotorista(
+                  name: "mta_nome", 
+                  label: "Nome do motorista",
+                  value: motorista.getNome,
+                  icon: Icons.person,
+                  validador: MotoristaValidator.validarNome,
                 ),
-                onPressed: () {
-                  if (!this._hasCampoHabilitado()) {
-                    return;
-                  }
-                  Motorista motorista = this._crateMotoristaFromState(formMotoristaNovo.currentState);
-                  if (motorista.cadastrar()) {
-                    _atualizaEstado(
-                      hasCadastro: true,
-                      nomeMotoristaEnabled: false,
-                      numeroCarroEnabled: false,
-                      numeroPixEnabled: false,
-                      motorista: motorista,
-                    );
-                    _exibirToast(context, "Motorista cadastrado com sucesso");
-                  }
-                },
-              ),
-            )
-          ],
-        )
-      ),
+                _InputMotorista(
+                  name: "numero_carro", 
+                  label: "Número do carro", 
+                  value: motorista.getNumeroCarro,
+                  icon: Icons.directions_bus_filled,
+                  validador: CarroValidator.validarNumero,
+                ),
+                _InputMotorista(
+                  name: "numero_pix", 
+                  label: "Chave PIX", 
+                  value: motorista.getNumeroPix,
+                  icon: Icons.pix
+                ),
+                _ButtonConfirm(texto: "Salvar", onPressed: () => _onClicked(context)),
+              ],
+            );
+          }
+        ),
+      )
     );
   }
 
-  IconButton _getIconEdit(onPressed) {
-    return IconButton(icon: Icon(Icons.edit), onPressed: onPressed);
-  }
-
-  _exibirToast(BuildContext context, String mensagem) {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(SnackBar(
-      content: Text(mensagem),
-      action: SnackBarAction(
-        label: "OK",
-        onPressed: messenger.hideCurrentSnackBar
-      ),
-    ));
-  }
-
-  _atualizaEstado({
-    bool? hasCadastro,
-    bool? nomeMotoristaEnabled,
-    bool? numeroCarroEnabled,
-    bool? numeroPixEnabled,
-    double? latitude,
-    double? longitude,
-    Motorista? motorista,
-  }) {
-    setState(() {
-      this._hasCadastro = hasCadastro ?? this._hasCadastro;
-      this._nomeMotoristaEnabled = nomeMotoristaEnabled ?? this._nomeMotoristaEnabled;
-      this._numeroCarroEnabled = numeroCarroEnabled ?? this._numeroCarroEnabled;
-      this._numeroPixEnabled = numeroPixEnabled ?? this._numeroPixEnabled;
-      this._latitude = latitude ?? this._latitude;
-      this._longitude = longitude ?? this._longitude;
-      this._motorista = motorista ?? this._motorista;
-    });
-  }
-
-  bool _hasCampoHabilitado() {
-    return this._nomeMotoristaEnabled || this._numeroCarroEnabled || this._numeroPixEnabled;
+  _onClicked(BuildContext context) {
+    Motorista motorista = this._crateMotoristaFromState(this._formMotorista.currentState);
+    context.read<MotoristaBloc>().add(MotoristaChangedEvent(motorista: motorista));
+    // _exibirToast(context, "Motorista cadastrado com sucesso");
   }
 
   Motorista _crateMotoristaFromState(FormBuilderState? state) {
     final fields = state?.fields ?? <String, FormBuilderFieldState>{};
-    final nomeMotorista = fields['nome_motorista']?.value;
-    final numeroCarro = fields['numero_carro']?.value;
-    final numeroPix = fields['numero_pix']?.value;
+    final nomeMotorista = fields['nome_motorista']?.value ?? "";
+    final numeroCarro = fields['numero_carro']?.value ?? "";
+    final numeroPix = fields['numero_pix']?.value ?? "";
 
-    return this._motorista.copy(
-        nome: nomeMotorista, 
-        numero: numeroCarro,
-        pix: numeroPix,
+    return Motorista(
+      nome: nomeMotorista, 
+      carro: Carro(numeroCarro),
+      pix: numeroPix,
     );
   }
+}
 
-  _atualizarPosicao(Position position) async {
-    this._atualizaEstado(
-      latitude: position.latitude,
-      longitude: position.longitude
+class _InputMotorista extends StatelessWidget {
+  final String name;
+  final String label;
+  final String value;
+  final IconData icon;
+  final String? Function(String?)? validador;
+
+  const _InputMotorista({
+    required this.name,
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.validador,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: FormBuilderTextField(
+          name: this.name,
+          initialValue: this.value,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: this.validador,
+          decoration: InputDecoration(
+            labelText: this.label,
+            prefixIcon: Icon(this.icon),
+          ),
+        )),
+      ],
+    );
+  }
+}
+
+class _ButtonConfirm extends StatelessWidget {
+  final String texto;
+  final Function()? onPressed;
+
+  const _ButtonConfirm({
+    required this.texto,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.bottomCenter,
+      margin: EdgeInsets.only(top: 20),
+      child: ElevatedButton(
+        onPressed: this.onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.check),
+            SizedBox(height: 5),
+            Text(this.texto),
+          ],
+        ),
+      ),
     );
   }
 }
