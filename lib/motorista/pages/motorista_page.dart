@@ -75,8 +75,10 @@ class _MotoristaState extends State<MotoristaPage> {
   }
 
   _listenDispostivoEvent(BuildContext context, DispositivoState state) {
-    final String hashDispositivo = state.info?.getIdentificador ?? "";
-    motoristaBloc.add(MotoristaLoadingEvent(hash: hashDispositivo));
+    if (state is DispositivoFinishState) {
+      final String hashDispositivo = state.info?.getIdentificador ?? "";
+      motoristaBloc.add(MotoristaLoadingEvent(hash: hashDispositivo, info: state.info));
+    }
   }
 }
 

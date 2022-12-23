@@ -1,3 +1,4 @@
+import 'package:coopertalse_motorista/dispositivo/dispositivo.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 
 abstract class MotoristaEvent {
@@ -15,7 +16,8 @@ class MotoristaChangedEvent extends MotoristaEvent {
 
 class MotoristaLoadingEvent extends MotoristaEvent { 
   final String hash;
-  const MotoristaLoadingEvent({ required this.hash }) : super();
+  final DispositivoInfo? info;
+  const MotoristaLoadingEvent({ required this.hash, this.info }) : super();
 }
 
 class MotoristaSuccessEvent extends MotoristaEvent {
