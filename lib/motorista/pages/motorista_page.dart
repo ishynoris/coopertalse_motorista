@@ -6,6 +6,7 @@ import 'package:coopertalse_motorista/motorista/bloc/motorista_event.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_state.dart';
 import 'package:coopertalse_motorista/motorista/pages/components/form_motorista.dart';
 import 'package:coopertalse_motorista/util/popup_usuario.dart';
+import 'package:coopertalse_motorista/util/widgets/circular_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,15 +42,7 @@ class _MotoristaState extends State<MotoristaPage> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(top: 18, bottom: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Informações do motorista/carro",
-                    style: TextStyle(fontSize: 18, color: Colors.black87),
-                  ),
-                ],
-              ),
+              child: _Subtitulo("Informações do motorista", carregando: !this._inicado),
             ),
             BlocProvider(
               create: (context) => motoristaBloc,
@@ -84,5 +77,31 @@ class _MotoristaState extends State<MotoristaPage> {
   _listenDispostivoEvent(BuildContext context, DispositivoState state) {
     final String hashDispositivo = state.info?.getIdentificador ?? "";
     motoristaBloc.add(MotoristaLoadingEvent(hash: hashDispositivo));
+  }
+}
+
+class _Subtitulo extends StatelessWidget {
+  
+  final String texto;
+  final bool carregando;
+  const _Subtitulo(this.texto, { 
+    this.carregando = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(this.texto),
+        if (this.carregando) 
+          CircularProgressCustom(
+            size: 26, 
+            sizeLine: 2, 
+            color: Colors.black,
+            margin: EdgeInsets.all(4),
+          ),
+      ],
+    );
   }
 }

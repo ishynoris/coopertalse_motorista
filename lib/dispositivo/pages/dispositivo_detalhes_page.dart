@@ -2,6 +2,7 @@ import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_bloc.dart';
 import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_event.dart';
 import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_state.dart';
 import 'package:coopertalse_motorista/dispositivo/dispositivo.dart';
+import 'package:coopertalse_motorista/util/widgets/circular_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +24,7 @@ class DispositivoDetalhePage extends StatelessWidget {
           if (state.status == DispositivoStatus.loading) {
             return Container(
               alignment: Alignment.centerRight,
-              child: _CircularProgressIndicator(size: 25, sizeLine: 2),
+              child: CircularProgressCustom(size: 25, sizeLine: 2),
             );
           }
 
@@ -32,35 +33,16 @@ class DispositivoDetalhePage extends StatelessWidget {
             Container(
               alignment: Alignment.bottomRight,
               padding: EdgeInsets.only(top: 3),
-              child: Text("Modelo ${info.getModelo}"),
+              child: Text(info.getModelo, style: TextStyle(fontSize: 12)),
             ),
             Container(
               alignment: Alignment.bottomRight,
               padding: EdgeInsets.only(top: 3),
-              child: Text("Dispositivo ${info.getIdentificador}"),
+              child: Text(info.getIdentificador, style: TextStyle(fontSize: 12)),
             ),
           ]);
         }
       ),
-    );
-  }
-}
-
-class _CircularProgressIndicator extends StatelessWidget {
-  final double size;
-  final double sizeLine;
-
-  const _CircularProgressIndicator({
-    required this.size,
-    required this.sizeLine,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: this.size,
-      width: this.size,
-      child: CircularProgressIndicator(strokeWidth: this.sizeLine)
     );
   }
 }
