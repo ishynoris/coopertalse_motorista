@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:coopertalse_motorista/api/request.dart';
+import 'package:coopertalse_motorista/exceptions/coopertalse_exception.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 
 class MotoristaAPI {
@@ -15,7 +16,7 @@ class MotoristaAPI {
       final json = mapJson['resposta'];
       return Motorista.from(jsonDecode(json));
     }
-    return Motorista.empty;
+    throw CoopertalseException(mapJson['mensagem']);
   }
 
   Future<Motorista> atualizar(Motorista motorista) async {

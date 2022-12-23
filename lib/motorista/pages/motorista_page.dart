@@ -71,6 +71,9 @@ class _MotoristaState extends State<MotoristaPage> {
         this._title = "Detalhes do motorista";
         this._inicado = true;
       });
+    } else if (state is MotoristaErroState) {
+      PopupUsuario(state.mensagem).showSnakbar(context);
+      setState(() => this._inicado = true);
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:coopertalse_motorista/exceptions/coopertalse_exception.dart';
 import 'package:coopertalse_motorista/motorista/api/motorista_api.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_event.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_state.dart';
@@ -29,8 +30,11 @@ class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
         motorista = motorista.copy(dispositivo: event.info);
         motorista.atualizar();
         return emitter(MotoristaSucessoState("Suas informações foram recuperadas com sucesso", motorista));
-      } on Exception {
-        return emitter(MotoristaErroState("Ocorreu um erro ao consultar os dados do motorista"));
+      } catch(e) {
+        final mensagem = e is CoopertalseException
+          ? e.toString()
+          : "Ocorreu um erro ao consultar os dados do motorista";
+        return emitter(MotoristaErroState(mensagem));
       }
     }
 

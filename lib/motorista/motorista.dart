@@ -47,7 +47,7 @@ class Motorista {
     return this.pix ?? "";
   }
 
-  bool isValido() {
+  bool get isValido {
     return this.nome.isNotEmpty;
   }
 
