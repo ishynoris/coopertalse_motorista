@@ -1,4 +1,4 @@
-// 
+import 'dart:convert';
 
 import 'package:coopertalse_motorista/carro/carro.dart';
 import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
@@ -25,8 +25,10 @@ class Motorista {
   }
 
   static Motorista from(Map json) {
-    final carro = Carro.from(json);
-    return Motorista(nome: json['mta_nome'], carro: carro);
+    Motorista motorista = Motorista(nome: json['mta_nome'], carro: Carro.from(json));
+    motorista.id = json['mta_id'];
+    motorista.pix = json['chx_chave_pix'];
+    return motorista;
   }
 
   int get getId {
@@ -79,7 +81,7 @@ class Motorista {
 
   @override
   String toString() {
-    return 'Motorista: {$getNome}, Carro: {$getNumeroCarro}, Pix: {$getNumeroPix}';
+    return jsonEncode(toJson());
   }
 
   Map toJson() {

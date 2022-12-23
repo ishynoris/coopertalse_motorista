@@ -1,4 +1,5 @@
 class Carro {
+  int? id;
   final String _numero;
 
   Carro(this._numero);
@@ -8,8 +9,9 @@ class Carro {
   }
 
   static Carro from (Map json) {
-    final String numero = json['cro_numero'];
-    return Carro(numero);
+    Carro carro = Carro(json['cro_numero']);
+    carro.id = json['cro_id'];
+    return carro;
   }
 
   String getNumero() {
