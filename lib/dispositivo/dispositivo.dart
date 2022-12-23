@@ -2,9 +2,9 @@ import 'package:device_info_plus/device_info_plus.dart';
 
 class Dispositivo {
 
-  static DispositivoInfo _info = DispositivoInfo.empty();
+  static late DispositivoInfo _info;
 
-  static Future<DispositivoInfo> getInfo() async {
+  static Future<DispositivoInfo> get info async {
     final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
     final androidInfo = _AndroidInfo(await deviceInfoPlugin.androidInfo);
     Dispositivo._info = Dispositivo._info.copyFrom(

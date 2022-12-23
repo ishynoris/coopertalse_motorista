@@ -2,7 +2,7 @@
 
 import 'package:coopertalse_motorista/carro/carro.dart';
 import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
-import 'package:coopertalse_motorista/util/dispositivo.dart';
+import 'package:coopertalse_motorista/dispositivo/dispositivo.dart';
 
 class Motorista {
 
