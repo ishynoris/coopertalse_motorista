@@ -2,16 +2,11 @@ import 'package:device_info_plus/device_info_plus.dart';
 
 class Dispositivo {
 
-  static late DispositivoInfo _info;
-
   static Future<DispositivoInfo> get info async {
-    final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-    final androidInfo = _AndroidInfo(await deviceInfoPlugin.androidInfo);
-    Dispositivo._info = Dispositivo._info.copyFrom(
-      modelo: androidInfo.modelo, 
-      identificador: androidInfo.identificador,
-    );
-    return Dispositivo._info;
+    return await Future.delayed(Duration(seconds: 2), () async {
+      final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+      return _AndroidInfo(await deviceInfoPlugin.androidInfo);
+    });
   }
 }
 
@@ -37,7 +32,7 @@ class DispositivoInfo {
     return modelo.isEmpty || identificador.isEmpty;
   }
 
-  static DispositivoInfo empty() {
+  static DispositivoInfo get empty {
     return DispositivoInfo("", "");
   }
 
