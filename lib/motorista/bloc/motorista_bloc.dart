@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
 
-  final _api = MotoristaAPI();
   late StreamSubscription<MotoristaState> _streamMotorista;
 
   MotoristaBloc() : super(MotoristaState.initial()) {
@@ -19,15 +18,14 @@ class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
 
   Future<void> _handleEvent(MotoristaEvent event, Emitter<MotoristaState> emitter) async {
     if (event.isChanged) {
-      final motorista = await this._api.atualizar(event.motorista);
-      await motorista.cadastrar();
+      final motorista = event.motorista;
+      await (motorista.hasId ? motorista.atualizar() : motorista.cadastrar());
       return emitter(MotoristaState.sucess("Atualizado com sucesso", motorista));
     }
 
     if (event.isLoading) {
       try {
-        Motorista motorista = await this._api.consultarPorPorHashDispositivo(event.getHash);
-        motorista.cadastrar();
+        Motorista motorista = await MotoristaAPI.consultarPorPorHashDispositivo(event.getHash);
         return emitter(MotoristaState.sucess("Suas informações foram recuperadas com sucesso", motorista));
       } catch(e) {
         final mensagem = CoopertalseException.message(e, padrao: "Ocorreu um erro ao consultar os dados do motorista");

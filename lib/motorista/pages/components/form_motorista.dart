@@ -16,12 +16,14 @@ class FormMotorista extends StatelessWidget {
 
   final _formMotorista = GlobalKey<FormBuilderState>();
   late DispositivoBloc dispositivoBloc;
+  late MotoristaBloc motoristaBloc;
 
   FormMotorista({super.key});
 
   @override
   Widget build(BuildContext context) {
-    this.dispositivoBloc = Provider.of(context);
+    this.dispositivoBloc = Provider.of<DispositivoBloc>(context);
+    this.motoristaBloc = Provider.of<MotoristaBloc>(context);
 
     return FormBuilder(
       key: _formMotorista,
@@ -72,10 +74,11 @@ class FormMotorista extends StatelessWidget {
     final numeroCarro = fields['cro_numero']?.value ?? "";
     final numeroPix = fields['chx_chave_pix']?.value ?? "";
     final dispositivoInfo = this.dispositivoBloc.state.info;
+    final motorista = this.motoristaBloc.state.motorista;
 
-    return Motorista(
+    return motorista.copy(
       nome: nomeMotorista, 
-      carro: Carro(numeroCarro),
+      numero: numeroCarro,
       pix: numeroPix,
       dispositivo: dispositivoInfo,
     );

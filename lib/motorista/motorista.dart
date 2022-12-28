@@ -33,33 +33,32 @@ class Motorista {
     return motorista;
   }
 
-  int get getId {
-    return this.id ?? 0;
-  }
-
-  String get getNome {
-    return this.nome;
-  }
-
-  String get getNumeroCarro {
-    return this.carro.getNumero().toString();
-  }
-
-  String get getNumeroPix {
-    return this.pix ?? "";
-  }
-
-  bool get isValido {
-    return this.nome.isNotEmpty;
-  }
-
-  DispositivoInfo? get getDispositivo {
-    return this.dispositivo;
-  }
+  bool get hasId => this.id != null;
+  int get getId => this.id ?? 0;
+  String get getNome => this.nome;
+  String get getNumeroCarro => this.carro.getNumero().toString();
+  String get getNumeroPix => this.pix ?? "";
+  bool get isValido => this.nome.isNotEmpty;
+  DispositivoInfo? get getDispositivo => this.dispositivo;
 
   Future<bool> cadastrar() async {
     try {
-      final motorista = await MotoristaAPI.salvar(this);
+      final motorista = await MotoristaAPI.cadastrar(this);
+      this.id = motorista.id;
+      this.nome = motorista.nome;
+      this.carro = motorista.carro;
+      this.dispositivo = motorista.dispositivo;
+      this.pix = motorista.pix;
+      SharedPreferencesRepo.getMotorista.insert(this);
+    } catch (e) {
+      CoopertalseException.retrows(e, padrao: "Não foi possível salvar suas informações.");
+    }
+    return true;
+  }
+
+  Future<bool> atualizar() async {
+    try {
+      final motorista = await MotoristaAPI.atualizar(this);
       this.id = motorista.id;
       this.nome = motorista.nome;
       this.carro = motorista.carro;
@@ -73,12 +72,14 @@ class Motorista {
   }
 
   Motorista copy({
+    int? int,
     String? nome, 
     String? numero,
     String? pix,
     DispositivoInfo? dispositivo,
   }) {
     return Motorista(
+      id: id ?? this.id,
       nome: nome ?? this.nome,
       carro: Carro(numero ?? this.carro.getNumero()),
       pix: pix ?? this.pix,
@@ -94,6 +95,7 @@ class Motorista {
   Map toJson() {
     // todo lista de pix
     return {
+      'mta_id': this.getId.toString(),
       'mta_nome': this.getNome,
       'mta_device_hash': this.dispositivo?.getIdentificador ?? "",
       'cro_numero': this.getNumeroCarro,
