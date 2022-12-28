@@ -1,30 +1,43 @@
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 
-abstract class MotoristaState {
+enum MotoristaStatus { initial, loading, update, sucess, error }
+
+class MotoristaState {
   final Motorista motorista;
+  final MotoristaStatus status;
+  String? mensagem;
   MotoristaState({
+    required this.status,
     required this.motorista,
+    this.mensagem,
   });
-}
 
-class MotoristaInitialState extends MotoristaState {
-  MotoristaInitialState() : super(motorista: Motorista.empty);
-}
+  bool get isInitial => this.status == MotoristaStatus.initial;
 
-class MotoristaLoadingState extends MotoristaState {
-  MotoristaLoadingState(motorista) : super(motorista: motorista);
-}
+  bool get isLoading => this.status == MotoristaStatus.loading;
 
-class MotoristaUpdateState extends MotoristaState {
-  MotoristaUpdateState(motorista) : super(motorista: motorista);
-}
+  bool get isUpdate => this.status == MotoristaStatus.update;
 
-class MotoristaSucessoState extends MotoristaState {
-  final String mensagem;
-  MotoristaSucessoState(this.mensagem, motorista) : super(motorista: motorista);
-}
+  bool get isSucess => this.status == MotoristaStatus.sucess;
 
-class MotoristaErroState extends MotoristaState {
-  final String mensagem;
-  MotoristaErroState(this.mensagem) : super(motorista: Motorista.empty);
+  bool get isError => this.status == MotoristaStatus.error;
+
+  String get getMensagem => this.mensagem ?? "";
+
+  static initial() => MotoristaState(
+    status: MotoristaStatus.initial, 
+    motorista: Motorista.empty
+  );
+
+  static sucess(String mensagem, Motorista motorista) => MotoristaState(
+    status: MotoristaStatus.sucess, 
+    motorista: motorista,
+    mensagem: mensagem,
+  );
+
+  static error(String mensagem) => MotoristaState(
+    status: MotoristaStatus.error, 
+    motorista: Motorista.empty,
+    mensagem: mensagem,
+  );
 }

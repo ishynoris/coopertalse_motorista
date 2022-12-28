@@ -1,6 +1,7 @@
 import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_bloc.dart';
 import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_state.dart';
 import 'package:coopertalse_motorista/dispositivo/pages/dispositivo_detalhes_page.dart';
+import 'package:coopertalse_motorista/exceptions/coopertalse_exception.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_bloc.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_event.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_state.dart';
@@ -64,15 +65,30 @@ class _MotoristaState extends State<MotoristaPage> {
     );
   }
 
-  _listenMotoristaEvent(BuildContext context, MotoristaState state) {
-    if (state is MotoristaSucessoState) {
-      PopupUsuario(state.mensagem).showSnakbar(context);
+  _listenMotoristaEvent(BuildContext context, MotoristaState state) async {
+    if (state.isSucess) {
+      PopupUsuario(state.getMensagem).showSnakbar(context);
       setState(() {
         this._title = "Detalhes do motorista";
         this._inicado = true;
       });
-    } else if (state is MotoristaErroState) {
-      PopupUsuario(state.mensagem).showSnakbar(context);
+    } else if (state.isUpdate) {
+      final novoMotorista = motoristaBloc.state.motorista.copy(
+        nome: state.motorista.getNome,
+        numero: state.motorista.getNumeroCarro,
+        pix: state.motorista.getNumeroPix,
+        dispositivo: state.motorista.getDispositivo,
+      );
+      try {
+        await novoMotorista.cadastrar();
+        PopupUsuario('Seus dados foram salvos com sucesso').showSnakbar(context);
+      } catch (e) {
+        final mensagem = CoopertalseException.message(e);
+        PopupUsuario(mensagem).showSnakbar(context);
+      }
+
+    } else if (state.isError) {
+      PopupUsuario(state.getMensagem).showSnakbar(context);
       setState(() => this._inicado = true);
     }
   }

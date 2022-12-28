@@ -12,7 +12,7 @@ class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
   final _api = MotoristaAPI();
   late StreamSubscription<MotoristaState> _streamMotorista;
 
-  MotoristaBloc() : super(MotoristaInitialState()) {
+  MotoristaBloc() : super(MotoristaState.initial()) {
     
     on<MotoristaEvent>(_handleEvent);
   }
@@ -20,30 +20,28 @@ class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
   Future<void> _handleEvent(MotoristaEvent event, Emitter<MotoristaState> emitter) async {
     if (event is MotoristaChangedEvent) {
       final motorista = await this._api.atualizar(event.motorista);
-      motorista.atualizar();
-      return emitter(MotoristaSucessoState("Atualiza com sucesso", motorista));
+      await motorista.cadastrar();
+      return emitter(MotoristaState.sucess("Atualizado com sucesso", motorista));
     }
 
     if (event is MotoristaLoadingEvent) {
       try {
         Motorista motorista = await this._api.consultarPorPorHashDispositivo(event.hash);
         motorista = motorista.copy(dispositivo: event.info);
-        motorista.atualizar();
-        return emitter(MotoristaSucessoState("Suas informações foram recuperadas com sucesso", motorista));
+        motorista.cadastrar();
+        return emitter(MotoristaState.sucess("Suas informações foram recuperadas com sucesso", motorista));
       } catch(e) {
-        final mensagem = e is CoopertalseException
-          ? e.toString()
-          : "Ocorreu um erro ao consultar os dados do motorista";
-        return emitter(MotoristaErroState(mensagem));
+        final mensagem = CoopertalseException.message(e, padrao: "Ocorreu um erro ao consultar os dados do motorista");
+        return emitter(MotoristaState.error(mensagem));
       }
     }
 
     if (event is MotoristaErrorEvent) {
-      return emitter(MotoristaErroState(event.mensagem));
+      return emitter(MotoristaState.error(event.mensagem));
     }
 
     if (event is MotoristaInitialEvent) {
-      return emitter(MotoristaInitialState());
+      return emitter(MotoristaState.initial());
     }
   }
 
