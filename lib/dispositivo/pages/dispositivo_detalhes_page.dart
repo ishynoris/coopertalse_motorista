@@ -14,7 +14,7 @@ class DispositivoDetalhePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!this.iniciado) {
-      context.read<DispositivoBloc>().add(DispositivoLoadingEvent());
+      context.read<DispositivoBloc>().add(DispositivoEvent.loading());
     }
 
     return Padding(

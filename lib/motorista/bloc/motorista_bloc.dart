@@ -18,16 +18,15 @@ class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
   }
 
   Future<void> _handleEvent(MotoristaEvent event, Emitter<MotoristaState> emitter) async {
-    if (event is MotoristaChangedEvent) {
+    if (event.isChanged) {
       final motorista = await this._api.atualizar(event.motorista);
       await motorista.cadastrar();
       return emitter(MotoristaState.sucess("Atualizado com sucesso", motorista));
     }
 
-    if (event is MotoristaLoadingEvent) {
+    if (event.isLoading) {
       try {
-        Motorista motorista = await this._api.consultarPorPorHashDispositivo(event.hash);
-        motorista = motorista.copy(dispositivo: event.info);
+        Motorista motorista = await this._api.consultarPorPorHashDispositivo(event.getHash);
         motorista.cadastrar();
         return emitter(MotoristaState.sucess("Suas informações foram recuperadas com sucesso", motorista));
       } catch(e) {
@@ -36,11 +35,11 @@ class MotoristaBloc extends Bloc<MotoristaEvent, MotoristaState> {
       }
     }
 
-    if (event is MotoristaErrorEvent) {
-      return emitter(MotoristaState.error(event.mensagem));
+    if (event.isError) {
+      return emitter(MotoristaState.error(event.getMensage));
     }
 
-    if (event is MotoristaInitialEvent) {
+    if (event.isInitial) {
       return emitter(MotoristaState.initial());
     }
   }

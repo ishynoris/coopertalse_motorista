@@ -6,19 +6,17 @@ enum  DispositivoStatus {
   finish,
 } 
 
-abstract class DispositivoState {  
+class DispositivoState {
   final DispositivoStatus status;
   final DispositivoInfo? info;
-  DispositivoState({
-    required this.status,
-    this.info,
-  });
-}
+  DispositivoState(this.status, { this.info });
 
-class DispositivoLoadingState extends DispositivoState {
-  DispositivoLoadingState() : super(status: DispositivoStatus.loading);
-}
+  bool get isLoading => this.status == DispositivoStatus.loading;
+  bool get isFinish => this.status == DispositivoStatus.finish;
 
-class DispositivoFinishState extends DispositivoState {
-  DispositivoFinishState(info) : super(status: DispositivoStatus.finish, info: info);
+  static DispositivoState loading() 
+    => DispositivoState(DispositivoStatus.loading);
+
+  static DispositivoState finish(DispositivoInfo info) 
+    => DispositivoState(DispositivoStatus.finish, info: info);
 }

@@ -1,31 +1,38 @@
 import 'package:coopertalse_motorista/dispositivo/dispositivo.dart';
 import 'package:coopertalse_motorista/motorista/motorista.dart';
 
-abstract class MotoristaEvent {
-  const MotoristaEvent();
+enum MotoristaEventStatus {
+  initial, changed, loading, sucess, error
 }
 
-class MotoristaInitialEvent extends MotoristaEvent { 
-  const MotoristaInitialEvent() : super();
-}
-
-class MotoristaChangedEvent extends MotoristaEvent {
+class MotoristaEvent {
+  final MotoristaEventStatus status;
   final Motorista motorista;
-  const MotoristaChangedEvent({ required this.motorista }) : super();
-}
+  final String? dispositivo;
+  final String? mensagem;
 
-class MotoristaLoadingEvent extends MotoristaEvent { 
-  final String hash;
-  final DispositivoInfo? info;
-  const MotoristaLoadingEvent({ required this.hash, this.info }) : super();
-}
+  const MotoristaEvent(this.status, this.motorista, { this.dispositivo, this.mensagem });
 
-class MotoristaSuccessEvent extends MotoristaEvent {
-  final Motorista motorista;
-  const MotoristaSuccessEvent({ required this.motorista }) : super();
-}
+  bool get isInitial => this.status == MotoristaEventStatus.initial;
+  bool get isChanged => this.status == MotoristaEventStatus.changed;
+  bool get isLoading => this.status == MotoristaEventStatus.loading;
+  bool get isSucess => this.status == MotoristaEventStatus.sucess;
+  bool get isError => this.status == MotoristaEventStatus.error;
+  String get getHash => this.dispositivo ?? "";
+  String get getMensage => this.mensagem ?? "";
 
-class MotoristaErrorEvent extends MotoristaEvent { 
-  final String mensagem;
-  const MotoristaErrorEvent({ required this.mensagem }) : super();
+  static MotoristaEvent initial() 
+    => MotoristaEvent(MotoristaEventStatus.initial, Motorista.empty );
+
+  static MotoristaEvent changed(Motorista motorista) 
+    => MotoristaEvent(MotoristaEventStatus.changed, motorista);
+
+  static MotoristaEvent loading(String hash) 
+    => MotoristaEvent(MotoristaEventStatus.loading, Motorista.empty, dispositivo: hash);
+
+  static MotoristaEvent success(Motorista motorista) 
+    => MotoristaEvent(MotoristaEventStatus.sucess, motorista);
+
+  static MotoristaEvent error(String mensagem) 
+    => MotoristaEvent(MotoristaEventStatus.error, Motorista.empty, mensagem: mensagem);
 }

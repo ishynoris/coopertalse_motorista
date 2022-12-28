@@ -1,14 +1,19 @@
 import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_state.dart';
 
-abstract class DispositivoEvent {
+enum DispositivoEventStatus { finish, loading }
+
+class DispositivoEvent {
+
   final DispositivoState state;
-  const DispositivoEvent(this.state);
-}
+  final DispositivoEventStatus status;
+  const DispositivoEvent(this.status, this.state);
 
-class DispositivoFinishEvent extends DispositivoEvent {
-  DispositivoFinishEvent(info) : super(DispositivoFinishState(info));
-}
+  bool get isLoading => this.status == DispositivoEventStatus.loading;
+  bool get isFinish => this.status == DispositivoEventStatus.finish;
 
-class DispositivoLoadingEvent extends DispositivoEvent {
-  DispositivoLoadingEvent() : super(DispositivoLoadingState());
+  static DispositivoEvent loading() 
+    => DispositivoEvent(DispositivoEventStatus.loading, DispositivoState.loading());
+
+  static DispositivoEvent finish(DispositivoState state) 
+    => DispositivoEvent(DispositivoEventStatus.finish, state);
 }
