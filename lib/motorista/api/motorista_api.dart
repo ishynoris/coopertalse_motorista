@@ -6,8 +6,12 @@ import 'package:coopertalse_motorista/motorista/motorista.dart';
 
 class MotoristaAPI {
 
-  static Future<Map> salvar(Motorista motorista) async {
-    return await Request.post("/motorista", motorista.toJson());
+  static Future<Motorista> salvar(Motorista motorista) async {
+    final json = await Request.post("/motorista/", motorista.toJson());
+    if (json['sucesso']) {
+      return Motorista.from(jsonDecode(json['resposta']));
+    }
+    throw CoopertalseException(json['mensagem']);
   }
 
   Future<Motorista> consultarPorPorHashDispositivo(String sHash) async {

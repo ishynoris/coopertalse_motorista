@@ -1,14 +1,16 @@
 import 'dart:convert';
 
 import 'package:coopertalse_motorista/carro/carro.dart';
+import 'package:coopertalse_motorista/exceptions/coopertalse_exception.dart';
+import 'package:coopertalse_motorista/motorista/api/motorista_api.dart';
 import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
 import 'package:coopertalse_motorista/dispositivo/dispositivo.dart';
 
 class Motorista {
 
   int? id;
-  final String nome;
-  final Carro carro;
+  String nome;
+  Carro carro;
   String? pix;
   DispositivoInfo? dispositivo;
 
@@ -55,13 +57,18 @@ class Motorista {
     return this.dispositivo;
   }
 
-  bool cadastrar() {
-    SharedPreferencesRepo.getMotorista.insert(this);
-    return true;
-  }
-
-  bool atualizar() {
-    SharedPreferencesRepo.getMotorista.update(this);
+  Future<bool> cadastrar() async {
+    try {
+      final motorista = await MotoristaAPI.salvar(this);
+      this.id = motorista.id;
+      this.nome = motorista.nome;
+      this.carro = motorista.carro;
+      this.dispositivo = motorista.dispositivo;
+      this.pix = motorista.pix;
+      SharedPreferencesRepo.getMotorista.insert(this);
+    } catch (e) {
+      CoopertalseException.retrows(e, padrao: "Não foi possível salvar suas informações.");
+    }
     return true;
   }
 
@@ -85,11 +92,12 @@ class Motorista {
   }
 
   Map toJson() {
+    // todo lista de pix
     return {
       'mta_nome': this.getNome,
-      'mta_device_hash': this.dispositivo?.getIdentificador,
+      'mta_device_hash': this.dispositivo?.getIdentificador ?? "",
       'cro_numero': this.getNumeroCarro,
-      'chx_chave_pix': [ this.pix ],
+      'chx_chave_pix[0]': this.pix,
     };
   }
 
