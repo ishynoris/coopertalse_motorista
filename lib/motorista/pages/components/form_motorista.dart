@@ -2,6 +2,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:coopertalse_motorista/carro/carro.dart';
+import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_bloc.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_bloc.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_event.dart';
 import 'package:coopertalse_motorista/motorista/bloc/motorista_state.dart';
@@ -9,15 +10,19 @@ import 'package:coopertalse_motorista/motorista/motorista.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:provider/provider.dart';
 
 class FormMotorista extends StatelessWidget {
 
   final _formMotorista = GlobalKey<FormBuilderState>();
+  late DispositivoBloc dispositivoBloc;
 
   FormMotorista({super.key});
 
   @override
   Widget build(BuildContext context) {
+    this.dispositivoBloc = Provider.of(context);
+
     return FormBuilder(
       key: _formMotorista,
       child: Padding(
@@ -58,7 +63,7 @@ class FormMotorista extends StatelessWidget {
 
   _onClicked(BuildContext context) {
     Motorista motorista = this._crateMotoristaFromState(this._formMotorista.currentState);
-    context.read<MotoristaBloc>().add(MotoristaChangedEvent(motorista: motorista));
+    context.read<MotoristaBloc>().add(MotoristaEvent.changed(motorista));
   }
 
   Motorista _crateMotoristaFromState(FormBuilderState? state) {
@@ -66,11 +71,13 @@ class FormMotorista extends StatelessWidget {
     final nomeMotorista = fields['mta_nome']?.value ?? "";
     final numeroCarro = fields['cro_numero']?.value ?? "";
     final numeroPix = fields['chx_chave_pix']?.value ?? "";
+    final dispositivoInfo = this.dispositivoBloc.state.info;
 
     return Motorista(
       nome: nomeMotorista, 
       carro: Carro(numeroCarro),
       pix: numeroPix,
+      dispositivo: dispositivoInfo,
     );
   }
 }

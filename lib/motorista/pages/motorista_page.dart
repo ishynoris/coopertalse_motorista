@@ -10,6 +10,7 @@ import 'package:coopertalse_motorista/util/popup_usuario.dart';
 import 'package:coopertalse_motorista/util/widgets/circular_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 class MotoristaPage extends StatefulWidget {
   const MotoristaPage({ super.key });
@@ -21,7 +22,7 @@ class MotoristaPage extends StatefulWidget {
 class _MotoristaState extends State<MotoristaPage> {
   late String _title;
   late bool _inicado;
-  final motoristaBloc = MotoristaBloc();
+  late MotoristaBloc motoristaBloc;
   
   _MotoristaState();
 
@@ -34,6 +35,8 @@ class _MotoristaState extends State<MotoristaPage> {
 
   @override
   Widget build(BuildContext context) {
+    this.motoristaBloc = Provider.of<MotoristaBloc>(context);
+    final dispositivoBloc = Provider.of<DispositivoBloc>(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(this._title)),
@@ -46,14 +49,14 @@ class _MotoristaState extends State<MotoristaPage> {
               child: _Subtitulo("Informações do motorista", carregando: !this._inicado),
             ),
             BlocProvider(
-              create: (context) => motoristaBloc,
+              create: (context) => this.motoristaBloc,
               child: BlocListener<MotoristaBloc, MotoristaState>(
                 listener: _listenMotoristaEvent,
                 child: FormMotorista(),
               ),
             ),
             BlocProvider(
-              create: (context) => DispositivoBloc(),
+              create: (context) => dispositivoBloc,
               child: BlocListener<DispositivoBloc, DispositivoState>(
                 listener: _listenDispostivoEvent,
                 child: DispositivoDetalhePage(iniciado: this._inicado),
@@ -94,9 +97,9 @@ class _MotoristaState extends State<MotoristaPage> {
   }
 
   _listenDispostivoEvent(BuildContext context, DispositivoState state) {
-    if (state is DispositivoFinishState) {
+    if (state.isFinish) {
       final String hashDispositivo = state.info?.getIdentificador ?? "";
-      motoristaBloc.add(MotoristaLoadingEvent(hash: hashDispositivo, info: state.info));
+      motoristaBloc.add(MotoristaEvent.loading(hashDispositivo));
     }
   }
 }
