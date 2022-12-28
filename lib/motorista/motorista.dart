@@ -1,66 +1,85 @@
-// 
+import 'dart:convert';
 
 import 'package:coopertalse_motorista/carro/carro.dart';
+import 'package:coopertalse_motorista/exceptions/coopertalse_exception.dart';
+import 'package:coopertalse_motorista/motorista/api/motorista_api.dart';
 import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
-import 'package:coopertalse_motorista/util/dispositivo.dart';
+import 'package:coopertalse_motorista/dispositivo/dispositivo.dart';
 
 class Motorista {
 
   int? id;
-  final String nome;
-  final Carro carro;
+  String nome;
+  Carro carro;
   String? pix;
   DispositivoInfo? dispositivo;
 
   Motorista({ 
-    this.id = 1,
+    this.id,
     required this.nome, 
     required this.carro,
     this.pix,
     this.dispositivo,
   });
 
-  int? get getId {
-    return this.id;
+  static Motorista get empty {
+    return  Motorista(nome: "", carro: Carro.empty());
   }
 
-  String get getNome {
-    return this.nome;
+  static Motorista from(Map json) {
+    Motorista motorista = Motorista(nome: json['mta_nome'], carro: Carro.from(json));
+    motorista.id = json['mta_id'];
+    motorista.pix = json['chx_chave_pix'];
+    return motorista;
   }
 
-  String get getNumeroCarro {
-    return this.carro.getNumero().toString();
-  }
+  bool get hasId => this.id != null;
+  int get getId => this.id ?? 0;
+  String get getNome => this.nome;
+  String get getNumeroCarro => this.carro.getNumero().toString();
+  String get getNumeroPix => this.pix ?? "";
+  bool get isValido => this.nome.isNotEmpty;
+  DispositivoInfo? get getDispositivo => this.dispositivo;
 
-  String? get getNumeroPix {
-    return this.pix;
-  }
-
-  bool isValido() {
-    return this.id! > 0;
-  }
-
-  DispositivoInfo? get getDispositivo {
-    return this.dispositivo;
-  }
-
-  bool cadastrar() {
-    SharedPreferencesRepo.getMotorista.insert(this);
+  Future<bool> cadastrar() async {
+    try {
+      final motorista = await MotoristaAPI.cadastrar(this);
+      this.id = motorista.id;
+      this.nome = motorista.nome;
+      this.carro = motorista.carro;
+      this.dispositivo = motorista.dispositivo;
+      this.pix = motorista.pix;
+      SharedPreferencesRepo.getMotorista.insert(this);
+    } catch (e) {
+      CoopertalseException.retrows(e, padrao: "Não foi possível salvar suas informações.");
+    }
     return true;
   }
 
-  bool atualizar() {
-    SharedPreferencesRepo.getMotorista.update(this);
+  Future<bool> atualizar() async {
+    try {
+      final motorista = await MotoristaAPI.atualizar(this);
+      this.id = motorista.id;
+      this.nome = motorista.nome;
+      this.carro = motorista.carro;
+      this.dispositivo = motorista.dispositivo;
+      this.pix = motorista.pix;
+      SharedPreferencesRepo.getMotorista.insert(this);
+    } catch (e) {
+      CoopertalseException.retrows(e, padrao: "Não foi possível salvar suas informações.");
+    }
     return true;
   }
 
   Motorista copy({
+    int? int,
     String? nome, 
-    int? numero,
+    String? numero,
     String? pix,
     DispositivoInfo? dispositivo,
   }) {
     return Motorista(
+      id: id ?? this.id,
       nome: nome ?? this.nome,
       carro: Carro(numero ?? this.carro.getNumero()),
       pix: pix ?? this.pix,
@@ -70,7 +89,18 @@ class Motorista {
 
   @override
   String toString() {
-    return 'Motorista: {$getNome}, Carro: {$getNumeroCarro}, Pix: {$getNumeroPix}';
+    return jsonEncode(toJson());
+  }
+
+  Map toJson() {
+    // todo lista de pix
+    return {
+      'mta_id': this.getId.toString(),
+      'mta_nome': this.getNome,
+      'mta_device_hash': this.dispositivo?.getIdentificador ?? "",
+      'cro_numero': this.getNumeroCarro,
+      'chx_chave_pix[0]': this.pix,
+    };
   }
 
   String hash() {

@@ -1,13 +1,23 @@
 import 'package:coopertalse_motorista/dependencias/dependencias.dart';
+import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_bloc.dart';
+import 'package:coopertalse_motorista/motorista/bloc/motorista_bloc.dart';
 import 'package:coopertalse_motorista/motorista/pages/motorista_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Dependencias.init();
 
-  runApp(const App());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (_) => MotoristaBloc()),
+        Provider(create: (_) => DispositivoBloc()),
+      ],
+      child: const App(),
+    ));
 }
 
 class App extends StatefulWidget {

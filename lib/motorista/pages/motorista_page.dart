@@ -1,11 +1,18 @@
-import 'package:coopertalse_motorista/motorista/motorista.dart';
+import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_bloc.dart';
+import 'package:coopertalse_motorista/dispositivo/bloc/dispositivo_state.dart';
+import 'package:coopertalse_motorista/dispositivo/pages/dispositivo_detalhes_page.dart';
+import 'package:coopertalse_motorista/exceptions/coopertalse_exception.dart';
+import 'package:coopertalse_motorista/motorista/bloc/motorista_bloc.dart';
+import 'package:coopertalse_motorista/motorista/bloc/motorista_event.dart';
+import 'package:coopertalse_motorista/motorista/bloc/motorista_state.dart';
 import 'package:coopertalse_motorista/motorista/pages/components/form_motorista.dart';
-import 'package:coopertalse_motorista/motorista/repo/shared_preferences_repo.dart';
-import 'package:coopertalse_motorista/util/dispositivo.dart';
+import 'package:coopertalse_motorista/util/popup_usuario.dart';
+import 'package:coopertalse_motorista/util/widgets/circular_progress_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 class MotoristaPage extends StatefulWidget {
-
   const MotoristaPage({ super.key });
 
   @override
@@ -13,20 +20,23 @@ class MotoristaPage extends StatefulWidget {
 }
 
 class _MotoristaState extends State<MotoristaPage> {
-
   late String _title;
-  Motorista? _motorista;
-  DispositivoInfo? _info;
+  late bool _inicado;
+  late MotoristaBloc motoristaBloc;
+  
+  _MotoristaState();
 
   @override
   void initState() {
+    this._title = "Novo motorista";
+    this._inicado = false;
     super.initState();
-    this._init();
-    this._initInfoDispositivo();
   }
 
   @override
   Widget build(BuildContext context) {
+    this.motoristaBloc = Provider.of<MotoristaBloc>(context);
+    final dispositivoBloc = Provider.of<DispositivoBloc>(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(this._title)),
@@ -36,50 +46,86 @@ class _MotoristaState extends State<MotoristaPage> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(top: 18, bottom: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Insira as informações do carro",
-                    style: TextStyle(fontSize: 18, color: Colors.black87),
-                  ),
-                ],
+              child: _Subtitulo("Informações do motorista", carregando: !this._inicado),
+            ),
+            BlocProvider(
+              create: (context) => this.motoristaBloc,
+              child: BlocListener<MotoristaBloc, MotoristaState>(
+                listener: _listenMotoristaEvent,
+                child: FormMotorista(),
               ),
             ),
-            FormMotorista(motorista:  _motorista),
-            if (this._info != null) 
-              Container(
-                alignment: Alignment.bottomRight,
-                padding: EdgeInsets.only(top: 3),
-                child: Text(this._info!.getModelo),
+            BlocProvider(
+              create: (context) => dispositivoBloc,
+              child: BlocListener<DispositivoBloc, DispositivoState>(
+                listener: _listenDispostivoEvent,
+                child: DispositivoDetalhePage(iniciado: this._inicado),
               ),
-            if (this._info != null) 
-              Container(
-                alignment: Alignment.bottomRight,
-                padding: EdgeInsets.only(top: 3),
-                child: Text(this._info!.getIdentificador),
-              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  _init() {
-    try {
-      this._motorista = SharedPreferencesRepo.getMotorista.select();
-      this._title = "Detalhes do motorista";
-    } on FormatException {
-      this._title = "Novo motorista";
+  _listenMotoristaEvent(BuildContext context, MotoristaState state) async {
+    if (state.isSucess) {
+      PopupUsuario(state.getMensagem).showSnakbar(context);
+      setState(() {
+        this._title = "Detalhes do motorista";
+        this._inicado = true;
+      });
+    } else if (state.isUpdate) {
+      final novoMotorista = motoristaBloc.state.motorista.copy(
+        nome: state.motorista.getNome,
+        numero: state.motorista.getNumeroCarro,
+        pix: state.motorista.getNumeroPix,
+        dispositivo: state.motorista.getDispositivo,
+      );
+      try {
+        await novoMotorista.cadastrar();
+        PopupUsuario('Seus dados foram salvos com sucesso').showSnakbar(context);
+      } catch (e) {
+        final mensagem = CoopertalseException.message(e);
+        PopupUsuario(mensagem).showSnakbar(context);
+      }
+
+    } else if (state.isError) {
+      PopupUsuario(state.getMensagem).showSnakbar(context);
+      setState(() => this._inicado = true);
     }
   }
 
-  _initInfoDispositivo() async {
-    DispositivoInfo? info = await Dispositivo.getInfo();
-    setState(() {
-      this._info = info;
-      this._motorista = this._motorista!.copy(dispositivo: this._info);
-      this._motorista!.atualizar();
-    });
+  _listenDispostivoEvent(BuildContext context, DispositivoState state) {
+    if (state.isFinish) {
+      final String hashDispositivo = state.info?.getIdentificador ?? "";
+      motoristaBloc.add(MotoristaEvent.loading(hashDispositivo));
+    }
+  }
+}
+
+class _Subtitulo extends StatelessWidget {
+  
+  final String texto;
+  final bool carregando;
+  const _Subtitulo(this.texto, { 
+    this.carregando = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(this.texto),
+        if (this.carregando) 
+          CircularProgressCustom(
+            size: 26, 
+            sizeLine: 2, 
+            color: Colors.black,
+            margin: EdgeInsets.all(4),
+          ),
+      ],
+    );
   }
 }
