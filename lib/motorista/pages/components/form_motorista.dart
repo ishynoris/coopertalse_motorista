@@ -35,14 +35,14 @@ class FormMotorista extends StatelessWidget {
                   validador: MotoristaValidator.validarNome,
                 ),
                 _InputMotorista(
-                  name: "numero_carro", 
+                  name: "cro_numero", 
                   label: "Número do carro", 
                   value: motorista.getNumeroCarro,
                   icon: Icons.directions_bus_filled,
                   validador: CarroValidator.validarNumero,
                 ),
                 _InputMotorista(
-                  name: "numero_pix", 
+                  name: "chx_chave_pix", 
                   label: "Chave PIX", 
                   value: motorista.getNumeroPix,
                   icon: Icons.pix
@@ -63,9 +63,9 @@ class FormMotorista extends StatelessWidget {
 
   Motorista _crateMotoristaFromState(FormBuilderState? state) {
     final fields = state?.fields ?? <String, FormBuilderFieldState>{};
-    final nomeMotorista = fields['nome_motorista']?.value ?? "";
-    final numeroCarro = fields['numero_carro']?.value ?? "";
-    final numeroPix = fields['numero_pix']?.value ?? "";
+    final nomeMotorista = fields['mta_nome']?.value ?? "";
+    final numeroCarro = fields['cro_numero']?.value ?? "";
+    final numeroPix = fields['chx_chave_pix']?.value ?? "";
 
     return Motorista(
       nome: nomeMotorista, 
